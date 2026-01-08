@@ -1,0 +1,15 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# OS Files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Project specific
+*.log
+
