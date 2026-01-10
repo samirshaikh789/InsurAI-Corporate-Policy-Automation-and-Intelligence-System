@@ -6,21 +6,40 @@ A comprehensive enterprise insurance management system with AI-powered automatio
 
 ```
 InsurAI-Corporate-Policy-Automation-and-Intelligence-System/
-└── Insurai-backend/          # Spring Boot Backend Application
-    ├── src/
-    │   ├── main/
-    │   │   ├── java/
-    │   │   │   └── com/insurai/insurai_backend/
-    │   │   │       ├── config/          # Security, JWT, CORS configurations
-    │   │   │       ├── controller/      # REST API endpoints
-    │   │   │       ├── model/           # Entity classes
-    │   │   │       ├── repository/      # Data access layer
-    │   │   │       └── service/         # Business logic
-    │   │   └── resources/
-    │   │       └── application.properties
-    │   └── test/
-    ├── pom.xml                # Maven dependencies
-    └── README.md
+├── Insurai-backend/          # Spring Boot Backend Application
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/
+│   │   │   │   └── com/insurai/insurai_backend/
+│   │   │   │       ├── config/          # Security, JWT, CORS configurations
+│   │   │   │       ├── controller/      # REST API endpoints
+│   │   │   │       ├── model/           # Entity classes
+│   │   │   │       ├── repository/      # Data access layer
+│   │   │   │       └── service/         # Business logic
+│   │   │   └── resources/
+│   │   │       └── application.properties
+│   │   └── test/
+│   ├── pom.xml                # Maven dependencies
+│   └── README.md
+├── Insurai-frontend/         # React Frontend Application
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── auth/            # Authentication pages
+│   │   │   └── dashboard/       # Role-based dashboards
+│   │   │       ├── Admin/       # Admin dashboard components
+│   │   │       ├── Agent/       # Agent dashboard components
+│   │   │       ├── Employee/    # Employee dashboard components
+│   │   │       └── Hr/          # HR dashboard components
+│   │   ├── api.js               # API configuration
+│   │   ├── App.jsx              # Main application component
+│   │   └── PrivateRoute.jsx     # Route protection
+│   ├── public/
+│   ├── package.json
+│   └── vite.config.js
+├── docs/                     # Project Documentation
+│   ├── ARCHITECTURE_GUIDE.md    # System architecture details
+│   └── COMPONENT_INDEX.md       # Component reference guide
+└── README.md
 ```
 
 ## Features
@@ -43,10 +62,22 @@ InsurAI-Corporate-Policy-Automation-and-Intelligence-System/
 - **ORM**: Spring Data JPA
 - **Build Tool**: Maven
 
+### Frontend
+- **Framework**: React 19.x
+- **Build Tool**: Vite 7.x
+- **UI Library**: React Bootstrap 5.3
+- **Routing**: React Router DOM 6.x
+- **HTTP Client**: Axios
+- **Charts**: Chart.js, Recharts
+- **Styling**: Bootstrap, Framer Motion
+- **Icons**: Bootstrap Icons, Lucide React
+- **Data Export**: React CSV, jsPDF, XLSX
+
 ## Prerequisites
 
 - Java 17 or higher
 - Maven 3.6+
+- Node.js 18+ and npm 9+
 - MySQL 8.0+
 - Git
 
@@ -117,6 +148,44 @@ run.bat
 ```
 
 The application will start on `http://localhost:8080`
+
+### 5. Frontend Setup and Run
+
+Navigate to the frontend directory and install dependencies:
+
+```bash
+cd Insurai-frontend
+npm install
+```
+
+Create a `.env` file in the `Insurai-frontend` directory (if needed):
+
+```env
+VITE_API_BASE_URL=http://localhost:8080
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+The frontend application will start on `http://localhost:5173`
+
+Build for production:
+
+```bash
+npm run build
+```
+
+The production build will be created in the `dist/` directory.
+
+## Documentation
+
+Comprehensive documentation is available in the `docs/` directory:
+
+- **[ARCHITECTURE_GUIDE.md](docs/ARCHITECTURE_GUIDE.md)**: Detailed system architecture, design patterns, and technical specifications
+- **[COMPONENT_INDEX.md](docs/COMPONENT_INDEX.md)**: Complete reference guide for all frontend and backend components
 
 ## API Endpoints
 
