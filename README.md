@@ -5,8 +5,7 @@ A comprehensive enterprise insurance management system with AI-powered automatio
 ## Project Structure
 
 ```
-InsurAI-Corporate-Policy-Automation-and-Intelligence-System/
-├── Insurai-backend/          # Spring Boot Backend Application
+InsurAI-Corporate-Policy-Automation-and-Intelligence-System/├── Insurai-backend/          # Spring Boot Backend Application
 │   ├── src/
 │   │   ├── main/
 │   │   │   ├── java/
