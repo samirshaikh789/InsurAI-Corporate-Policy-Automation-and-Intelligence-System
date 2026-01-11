@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
@@ -59,6 +59,17 @@ const scaleHover = {
 ========================= */
 const HomePage = () => {
   const navigate = useNavigate();
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const handleNavClick = (event, sectionId) => {
+    event.preventDefault();
+    scrollToSection(sectionId);
+  };
 
   return (
     <div style={styles.page}>
@@ -75,10 +86,34 @@ const HomePage = () => {
           </div>
 
           <div style={styles.navLinks}>
-            <a href="#platform" style={styles.navLink}>Platform</a>
-            <a href="#workflow" style={styles.navLink}>Workflow</a>
-            <a href="#roles" style={styles.navLink}>Roles</a>
-            <a href="#login" style={styles.navBtn}>Get Started</a>
+            <a
+              href="#platform"
+              style={styles.navLink}
+              onClick={(e) => handleNavClick(e, "platform")}
+            >
+              Platform
+            </a>
+            <a
+              href="#workflow"
+              style={styles.navLink}
+              onClick={(e) => handleNavClick(e, "workflow")}
+            >
+              Workflow
+            </a>
+            <a
+              href="#roles"
+              style={styles.navLink}
+              onClick={(e) => handleNavClick(e, "roles")}
+            >
+              Roles
+            </a>
+            <a
+              href="#login"
+              style={styles.navBtn}
+              onClick={(e) => handleNavClick(e, "login")}
+            >
+              Get Started
+            </a>
           </div>
         </div>
       </motion.nav>
@@ -108,8 +143,20 @@ const HomePage = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
-            <a href="#login" style={styles.primaryBtn}>Get Started</a>
-            <a href="#workflow" style={styles.secondaryBtn}>Explore System</a>
+            <button
+              type="button"
+              style={styles.primaryBtn}
+              onClick={() => scrollToSection("login")}
+            >
+              Get Started
+            </button>
+            <button
+              type="button"
+              style={styles.secondaryBtn}
+              onClick={() => scrollToSection("workflow")}
+            >
+              Explore System
+            </button>
           </motion.div>
         </motion.div>
 
@@ -198,66 +245,42 @@ const HomePage = () => {
           </p>
         </motion.div>
 
-        <div style={styles.roleGrid}>
-          {roleCards.map((role, i) => (
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          style={styles.accessGrid}
+        >
+          {accessActions.map((action, idx) => (
             <motion.div
-              key={i}
+              key={action.title}
               {...scaleHover}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.15 }}
-              viewport={{ once: true }}
-              onClick={() => navigate(role.path)}
+              transition={{ delay: idx * 0.1 }}
               style={{
-                ...styles.roleCard,
-                background: role.gradient,
+                ...styles.accessCard,
+                borderColor: action.accent,
               }}
             >
-              <div style={styles.roleIconWrapper}>
-                <div style={styles.roleIcon}>{role.icon}</div>
+              <div style={styles.accessIcon}>{action.icon}</div>
+              <div>
+                <p style={styles.accessLabel}>{action.title}</p>
+                <p style={styles.accessDesc}>{action.desc}</p>
               </div>
-              
-              <h3 style={styles.roleTitle}>{role.title}</h3>
-              <p style={styles.roleDesc}>{role.desc}</p>
-              
-              <div style={styles.roleFeatures}>
-                {role.features.map((feature, idx) => (
-                  <div key={idx} style={styles.roleFeature}>
-                    <span style={styles.checkmark}>✓</span>
-                    <span>{feature}</span>
-                  </div>
-                ))}
-              </div>
-
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                style={styles.roleButton}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                style={{
+                  ...styles.accessButton,
+                  color: action.accent,
+                  borderColor: action.accent,
+                }}
+                onClick={() => navigate(action.path)}
               >
-                {role.buttonText} →
+                {action.button}
               </motion.button>
             </motion.div>
           ))}
-        </div>
-
-        {/* REGISTRATION PROMPT */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          viewport={{ once: true }}
-          style={styles.registerPrompt}
-        >
-          <p style={styles.promptText}>
-            New to InsurAI? 
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              onClick={() => navigate("/employee/register")}
-              style={styles.registerLink}
-            >
-              Create an Employee Account
-            </motion.button>
-          </p>
         </motion.div>
       </section>
 
@@ -294,7 +317,52 @@ const HomePage = () => {
 
       {/* ================= FOOTER ================= */}
       <footer style={styles.footer}>
-        © 2025 InsurAI · AI-First Insurance Infrastructure
+        <div style={styles.footerContent}>
+          <div>
+            <div style={styles.footerBrand}>
+              Insur<span style={styles.brandAccent}>AI</span>
+            </div>
+            <p style={styles.footerText}>
+              AI-first infrastructure for automated, intelligent insurance.
+            </p>
+          </div>
+
+          <div style={styles.footerLinks}>
+            <button
+              type="button"
+              style={styles.footerLink}
+              onClick={() => scrollToSection("platform")}
+            >
+              Platform
+            </button>
+            <button
+              type="button"
+              style={styles.footerLink}
+              onClick={() => scrollToSection("workflow")}
+            >
+              Workflow
+            </button>
+            <button
+              type="button"
+              style={styles.footerLink}
+              onClick={() => scrollToSection("roles")}
+            >
+              Roles
+            </button>
+            <button
+              type="button"
+              style={styles.footerLink}
+              onClick={() => scrollToSection("login")}
+            >
+              Access
+            </button>
+          </div>
+
+          <div style={styles.footerMeta}>
+            <span>© 2025 InsurAI</span>
+            <span>Enterprise Insurance Automation</span>
+          </div>
+        </div>
       </footer>
     </div>
   );
@@ -325,43 +393,47 @@ const roles = [
   { icon: "⚙️", title: "Admin", desc: "System governance and analytics." }
 ];
 
-const roleCards = [
+const accessActions = [
+  {
+    title: "New Employee",
+    desc: "Create a secure InsurAI employee profile.",
+    button: "Register Employee",
+    path: "/employee/register",
+    icon: "✨",
+    accent: theme.neonBlue,
+  },
   {
     title: "Employee Portal",
-    icon: "👤",
-    desc: "Access your policies, submit claims, and track coverage",
+    desc: "Manage policies, claims, and support.",
+    button: "Employee Login",
     path: "/employee/login",
-    buttonText: "Employee Login",
-    gradient: "linear-gradient(135deg, rgba(56,189,248,0.15) 0%, rgba(129,140,248,0.15) 100%)",
-    features: ["View Policies", "File Claims", "Track Status"]
+    icon: "👤",
+    accent: theme.neonPurple,
   },
   {
-    title: "HR Portal",
-    icon: "🏢",
-    desc: "Manage employee policies and workforce analytics",
+    title: "HR Command",
+    desc: "Oversee policies and workforce analytics.",
+    button: "HR Login",
     path: "/hr/login",
-    buttonText: "HR Login",
-    gradient: "linear-gradient(135deg, rgba(30,60,114,0.15) 0%, rgba(42,82,152,0.15) 100%)",
-    features: ["Policy Management", "Analytics", "Reports"]
+    icon: "🏢",
+    accent: theme.neonPink,
   },
   {
-    title: "Agent Portal",
-    icon: "🧑‍💼",
-    desc: "Assist customers and manage onboarding processes",
+    title: "Agent Desk",
+    desc: "Assist customers and process requests.",
+    button: "Agent Login",
     path: "/agent/login",
-    buttonText: "Agent Login",
-    gradient: "linear-gradient(135deg, rgba(8,127,91,0.15) 0%, rgba(16,185,129,0.15) 100%)",
-    features: ["Customer Support", "Onboarding", "Assistance"]
+    icon: "🧑‍💼",
+    accent: theme.neonGreen,
   },
   {
     title: "Admin Control",
-    icon: "⚙️",
-    desc: "System governance, analytics, and configuration",
+    desc: "Configure systems and monitor analytics.",
+    button: "Admin Login",
     path: "/admin/login",
-    buttonText: "Admin Login",
-    gradient: "linear-gradient(135deg, rgba(139,0,134,0.15) 0%, rgba(43,9,56,0.15) 100%)",
-    features: ["System Config", "Analytics", "User Management"]
-  }
+    icon: "⚙️",
+    accent: theme.neonPurple,
+  },
 ];
 
 /* =========================
@@ -418,6 +490,7 @@ const styles = {
     textDecoration: "none",
     fontWeight: 500,
     transition: "color 0.3s",
+    cursor: "pointer",
   },
 
   navBtn: {
@@ -428,6 +501,7 @@ const styles = {
     fontWeight: 700,
     textDecoration: "none",
     transition: "transform 0.3s",
+    cursor: "pointer",
   },
 
   hero: {
@@ -478,6 +552,8 @@ const styles = {
     fontWeight: 700,
     textDecoration: "none",
     transition: "transform 0.3s",
+    border: "none",
+    cursor: "pointer",
   },
 
   secondaryBtn: {
@@ -487,6 +563,8 @@ const styles = {
     color: theme.textPrimary,
     textDecoration: "none",
     transition: "all 0.3s",
+    background: "transparent",
+    cursor: "pointer",
   },
 
   orbBlue: {
@@ -594,117 +672,102 @@ const styles = {
     fontSize: "0.9rem",
     color: theme.textSecondary,
   },
-
-  // ========== ROLE SELECTION STYLES ==========
-  roleGrid: {
+  accessGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-    gap: "2rem",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "1.5rem",
     marginBottom: "3rem",
   },
 
-  roleCard: {
-    background: theme.surface,
+  accessCard: {
+    background: "rgba(15,23,42,0.6)",
     border: `1px solid ${theme.border}`,
-    borderRadius: "24px",
-    padding: "2.5rem",
-    backdropFilter: "blur(20px)",
-    cursor: "pointer",
-    position: "relative",
-    overflow: "hidden",
-    transition: "all 0.3s ease",
-  },
-
-  roleIconWrapper: {
-    marginBottom: "1.5rem",
-  },
-
-  roleIcon: {
-    fontSize: "3.5rem",
-    display: "inline-block",
-  },
-
-  roleTitle: {
-    fontSize: "1.5rem",
-    fontWeight: 700,
-    marginBottom: "0.8rem",
-  },
-
-  roleDesc: {
-    fontSize: "0.95rem",
-    color: theme.textSecondary,
-    marginBottom: "1.5rem",
-    lineHeight: 1.6,
-  },
-
-  roleFeatures: {
-    marginBottom: "2rem",
+    borderRadius: "18px",
+    padding: "1.5rem",
     display: "flex",
     flexDirection: "column",
-    gap: "0.6rem",
+    gap: "0.9rem",
+    minHeight: "200px",
   },
 
-  roleFeature: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.6rem",
-    fontSize: "0.85rem",
-    color: theme.textSecondary,
+  accessIcon: {
+    fontSize: "2rem",
   },
 
-  checkmark: {
-    color: theme.neonGreen,
-    fontWeight: "bold",
-    fontSize: "1rem",
-  },
-
-  roleButton: {
-    width: "100%",
-    padding: "0.9rem",
-    borderRadius: "12px",
-    border: "none",
-    background: theme.gradientNeon,
-    color: "#020617",
-    fontWeight: 700,
-    fontSize: "0.95rem",
-    cursor: "pointer",
-    transition: "all 0.3s",
-  },
-
-  registerPrompt: {
-    textAlign: "center",
-    padding: "2rem",
-    background: "rgba(15,23,42,0.45)",
-    borderRadius: "16px",
-    border: `1px solid ${theme.border}`,
-  },
-
-  promptText: {
-    fontSize: "1rem",
-    color: theme.textSecondary,
-    margin: 0,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "0.8rem",
-    flexWrap: "wrap",
-  },
-
-  registerLink: {
-    background: "none",
-    border: "none",
-    color: theme.neonBlue,
+  accessLabel: {
+    fontSize: "1.1rem",
     fontWeight: 600,
+    marginBottom: "0.4rem",
+  },
+
+  accessDesc: {
+    color: theme.textSecondary,
+    fontSize: "0.9rem",
+    lineHeight: 1.4,
+    marginBottom: "0.6rem",
+  },
+
+  accessButton: {
+    marginTop: "auto",
+    borderRadius: "12px",
+    border: "1px solid transparent",
+    background: "transparent",
+    fontWeight: 600,
+    padding: "0.7rem 1rem",
     cursor: "pointer",
-    textDecoration: "underline",
-    fontSize: "1rem",
   },
 
   footer: {
-    padding: "2rem",
-    textAlign: "center",
+    padding: "3rem 2rem",
     color: theme.textSecondary,
-    fontSize: "0.85rem",
+    fontSize: "0.9rem",
+    borderTop: `1px solid ${theme.border}`,
+    background: "rgba(2,6,23,0.9)",
+  },
+
+  footerContent: {
+    maxWidth: "1200px",
+    margin: "0 auto",
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "1.5rem",
+    alignItems: "center",
+  },
+
+  footerBrand: {
+    fontSize: "1.4rem",
+    fontWeight: 700,
+    marginBottom: "0.4rem",
+  },
+
+  footerText: {
+    margin: 0,
+    color: theme.textSecondary,
+    lineHeight: 1.5,
+  },
+
+  footerLinks: {
+    display: "flex",
+    gap: "1rem",
+    flexWrap: "wrap",
+    justifyContent: "center",
+  },
+
+  footerLink: {
+    background: "transparent",
+    border: `1px solid ${theme.border}`,
+    borderRadius: "10px",
+    padding: "0.6rem 1rem",
+    color: theme.textPrimary,
+    cursor: "pointer",
+    fontWeight: 500,
+  },
+
+  footerMeta: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.4rem",
+    alignItems: "flex-end",
   },
 };
 

@@ -1,10 +1,24 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+
+const theme = {
+  bg: "#020617",
+  surface: "rgba(15,23,42,0.65)",
+  border: "rgba(148,163,184,0.15)",
+
+  textPrimary: "#F8FAFC",
+  textSecondary: "#94A3B8",
+
+  neonBlue: "#38BDF8",
+  neonPurple: "#818CF8",
+  neonPink: "#F472B6",
+
+  gradient: "linear-gradient(135deg, #1e3c72, #2a5298, #38bdf8)",
+  glow: "0 0 40px rgba(30,60,114,0.35)",
+};
 
 export default function HrLogin() {
-  const navigate = useNavigate();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorEmail, setErrorEmail] = useState("");
@@ -12,8 +26,10 @@ export default function HrLogin() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const validateEmail = (email) =>
-    /^[a-zA-Z0-9._%+-]+@[a-zA-Z][a-zA-Z0-9-]*(\.[a-zA-Z]{2,})+$/.test(email);
+  const navigate = useNavigate();
+
+  const validateEmail = (value) =>
+    /^[a-zA-Z0-9._%+-]+@[a-zA-Z][a-zA-Z0-9-]*(\.[a-zA-Z]{2,})+$/.test(value);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -45,178 +61,246 @@ export default function HrLogin() {
       const data = await res.json();
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", "hr");
-      localStorage.setItem("name", data.name);
-      localStorage.setItem("id", data.id);
+      localStorage.setItem("name", data.name || "");
+      localStorage.setItem("id", data.id || "");
 
-      navigate("/hr/dashboard");
+      navigate("/hr/dashboard", { replace: true });
     } catch (err) {
-      setErrorPassword(err.message);
+      setErrorPassword(err.message || "Login failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <>
-      {/* GLOBAL STYLES */}
-      <style>{`
-        @keyframes gradientFlow {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
+    <div style={styles.page}>
+      <div style={styles.orbBlue} />
+      <div style={styles.orbPurple} />
 
-        @keyframes fadeSlide {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        .glass-card {
-          background: rgba(255,255,255,0.95);
-          backdrop-filter: blur(20px);
-          animation: fadeSlide 0.9s ease;
-        }
-
-        .hr-input:focus {
-          border-color: #1e3c72;
-          box-shadow: 0 0 0 3px rgba(30,60,114,0.15);
-        }
-
-        .hr-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 14px 30px rgba(30,60,114,0.45);
-        }
-      `}</style>
-
-      <div
-        className="d-flex justify-content-center align-items-center"
-        style={{
-          minHeight: "100vh",
-          background:
-            "linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1e3c72)",
-          backgroundSize: "400% 400%",
-          animation: "gradientFlow 15s ease infinite",
-          fontFamily: "'Segoe UI', sans-serif",
-        }}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7 }}
+        style={styles.card}
       >
-        <div
-          className="glass-card shadow-lg"
-          style={{
-            width: "100%",
-            maxWidth: "420px",
-            padding: "42px",
-            borderRadius: "22px",
-          }}
-        >
-          {/* HEADER */}
-          <div className="text-center mb-4">
-            <div
-              style={{
-                width: "80px",
-                height: "80px",
-                margin: "0 auto 18px",
-                borderRadius: "20px",
-                background:
-                  "linear-gradient(135deg, #1e3c72, #2a5298)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#fff",
-                boxShadow: "0 12px 30px rgba(30,60,114,0.4)",
-              }}
-            >
-              👥
-            </div>
-            <h3 className="fw-bold mb-1">HR Portal</h3>
-            <p className="text-muted">
-              Secure Human Resource Management Access
-            </p>
-          </div>
-
-          {/* FORM */}
-          <form onSubmit={handleLogin}>
-            <div className="mb-3">
-              <label className="form-label fw-semibold">Email</label>
-              <input
-                type="email"
-                className={`form-control hr-input ${
-                  errorEmail ? "is-invalid" : ""
-                }`}
-                placeholder="hr@insurai.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{ borderRadius: "12px", padding: "12px" }}
-                required
-              />
-              {errorEmail && (
-                <small className="text-danger">{errorEmail}</small>
-              )}
-            </div>
-
-            <div className="mb-4">
-              <label className="form-label fw-semibold">Password</label>
-              <div className="position-relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  className={`form-control hr-input ${
-                    errorPassword ? "is-invalid" : ""
-                  }`}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  style={{
-                    borderRadius: "12px",
-                    padding: "12px 44px 12px 12px",
-                  }}
-                  required
-                />
-                <button
-                  type="button"
-                  className="btn position-absolute top-50 end-0 translate-middle-y me-2"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  👁
-                </button>
-              </div>
-              {errorPassword && (
-                <small className="text-danger">{errorPassword}</small>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn hr-btn w-100 fw-semibold"
-              style={{
-                background:
-                  "linear-gradient(135deg, #1e3c72, #2a5298)",
-                color: "#fff",
-                borderRadius: "12px",
-                padding: "14px",
-                border: "none",
-                transition: "0.3s ease",
-              }}
-            >
-              {loading ? "Signing in..." : "Access HR Dashboard"}
-            </button>
-          </form>
-
-          {/* FOOTER */}
-          <div className="text-center mt-4">
-            <Link
-              to="/"
-              className="fw-semibold text-decoration-none"
-              style={{ color: "#1e3c72" }}
-            >
-              ← Back to Home
-            </Link>
-
-            <div className="mt-3 text-muted" style={{ fontSize: "0.8rem" }}>
-              🔐 Secure HR Portal • Role-Based Access
-            </div>
-          </div>
+        <div style={styles.brand}>
+          Insur<span style={styles.brandAccent}>AI</span>
         </div>
-      </div>
-    </>
+
+        <h2 style={styles.title}>HR Login</h2>
+        <p style={styles.subtitle}>
+          Manage workforce policies with enterprise security
+        </p>
+
+        <form onSubmit={handleLogin}>
+          <div style={styles.field}>
+            <input
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={{
+                ...styles.input,
+                borderColor: errorEmail ? "#DC2626" : theme.border,
+              }}
+            />
+            {errorEmail && <span style={styles.error}>{errorEmail}</span>}
+          </div>
+
+          <div style={styles.field}>
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{
+                  ...styles.input,
+                  paddingRight: "3rem",
+                  borderColor: errorPassword ? "#DC2626" : theme.border,
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={styles.eye}
+              >
+                {showPassword ? "🙈" : "👁️"}
+              </button>
+            </div>
+            {errorPassword && <span style={styles.error}>{errorPassword}</span>}
+          </div>
+
+          <div style={styles.forgot}>
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              style={styles.linkBtn}
+            >
+              Back to home portal
+            </button>
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.02, boxShadow: theme.glow }}
+            whileTap={{ scale: 0.98 }}
+            type="submit"
+            disabled={loading}
+            style={styles.submit}
+          >
+            {loading ? "Signing in..." : "Access HR Dashboard"}
+          </motion.button>
+        </form>
+
+        <p style={styles.footer}>Need access? Contact your InsurAI admin.</p>
+
+        <small style={styles.secure}>
+          🔐 Role-based HR access • JWT Secured
+        </small>
+      </motion.div>
+    </div>
   );
 }
+
+const styles = {
+  page: {
+    minHeight: "100vh",
+    background: theme.bg,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    overflow: "hidden",
+    fontFamily: "Inter, system-ui",
+    padding: "1rem",
+  },
+
+  orbBlue: {
+    position: "absolute",
+    width: 420,
+    height: 420,
+    background: "rgba(56,189,248,0.2)",
+    filter: "blur(150px)",
+    top: "10%",
+    left: "-12%",
+  },
+
+  orbPurple: {
+    position: "absolute",
+    width: 420,
+    height: 420,
+    background: "rgba(129,140,248,0.25)",
+    filter: "blur(160px)",
+    bottom: "8%",
+    right: "-10%",
+  },
+
+  card: {
+    width: "100%",
+    maxWidth: 420,
+    padding: "2.8rem",
+    background: theme.surface,
+    backdropFilter: "blur(18px)",
+    border: `1px solid ${theme.border}`,
+    borderRadius: 24,
+    color: theme.textPrimary,
+    zIndex: 2,
+  },
+
+  brand: {
+    fontSize: "1.6rem",
+    fontWeight: 800,
+    textAlign: "center",
+  },
+
+  brandAccent: {
+    background: theme.gradient,
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+  },
+
+  title: {
+    marginTop: "1rem",
+    fontSize: "1.8rem",
+    textAlign: "center",
+  },
+
+  subtitle: {
+    textAlign: "center",
+    color: theme.textSecondary,
+    marginBottom: "2rem",
+    fontSize: "0.95rem",
+  },
+
+  field: {
+    marginBottom: "1.3rem",
+  },
+
+  input: {
+    width: "100%",
+    padding: "0.9rem 1rem",
+    borderRadius: 12,
+    background: "rgba(2,6,23,0.6)",
+    color: theme.textPrimary,
+    border: `1px solid ${theme.border}`,
+    outline: "none",
+    fontSize: "0.95rem",
+  },
+
+  eye: {
+    position: "absolute",
+    right: 12,
+    top: "50%",
+    transform: "translateY(-50%)",
+    background: "none",
+    border: "none",
+    color: theme.textSecondary,
+    cursor: "pointer",
+  },
+
+  error: {
+    color: "#DC2626",
+    fontSize: "0.8rem",
+    marginTop: "0.4rem",
+    display: "block",
+  },
+
+  forgot: {
+    textAlign: "right",
+    marginBottom: "1.5rem",
+  },
+
+  linkBtn: {
+    background: "none",
+    border: "none",
+    color: theme.neonBlue,
+    cursor: "pointer",
+    fontSize: "0.85rem",
+  },
+
+  submit: {
+    width: "100%",
+    padding: "0.9rem",
+    borderRadius: 14,
+    border: "none",
+    background: theme.gradient,
+    color: "#020617",
+    fontWeight: 700,
+    cursor: "pointer",
+  },
+
+  footer: {
+    marginTop: "1.5rem",
+    textAlign: "center",
+    fontSize: "0.85rem",
+    color: theme.textSecondary,
+  },
+
+  secure: {
+    display: "block",
+    marginTop: "1rem",
+    textAlign: "center",
+    fontSize: "0.75rem",
+    color: theme.textSecondary,
+  },
+};
