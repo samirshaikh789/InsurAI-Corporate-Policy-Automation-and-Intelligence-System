@@ -1,7 +1,22 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
+
+/* =========================
+   THEME (from Homepage)
+========================= */
+const theme = {
+  bg: "#020617",
+  surface: "rgba(15,23,42,0.65)",
+  border: "rgba(148,163,184,0.15)",
+  textPrimary: "#F8FAFC",
+  textSecondary: "#94A3B8",
+  neonBlue: "#38BDF8",
+  neonPurple: "#818CF8",
+  neonPink: "#F472B6",
+  gradientMain: "linear-gradient(135deg, #020617 0%, #020617 40%, #0F172A 100%)",
+  gradientNeon: "linear-gradient(135deg, #38BDF8 0%, #818CF8 50%, #F472B6 100%)",
+};
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -35,8 +50,7 @@ export default function ForgotPassword() {
   };
 
   return (
-    <>
-      {/* ANIMATIONS & GLOBAL STYLES */}
+    <div style={styles.page}>
       <style>{`
         @keyframes gradientMove {
           0% { background-position: 0% 50%; }
@@ -48,170 +62,258 @@ export default function ForgotPassword() {
           from { opacity: 0; transform: translateY(40px); }
           to { opacity: 1; transform: translateY(0); }
         }
-
-        .glass-box {
-          background: rgba(255,255,255,0.92);
-          backdrop-filter: blur(20px);
-          animation: fadeUp 0.8s ease;
-        }
-
-        .form-input:focus {
-          border-color: #2563eb;
-          box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
-        }
-
-        .submit-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 12px 30px rgba(37,99,235,0.45);
-        }
       `}</style>
 
-      <div
-        className="d-flex justify-content-center align-items-center"
-        style={{
-          minHeight: "100vh",
-          background:
-            "linear-gradient(-45deg, #0f172a, #1e3a8a, #2563eb, #0f172a)",
-          backgroundSize: "400% 400%",
-          animation: "gradientMove 16s ease infinite",
-          fontFamily: "'Segoe UI', system-ui, sans-serif",
-        }}
-      >
-        <div
-          className="glass-box shadow-lg"
-          style={{
-            width: "100%",
-            maxWidth: "420px",
-            padding: "42px",
-            borderRadius: "22px",
-          }}
-        >
-          {/* HEADER */}
-          <div className="text-center mb-4">
-            <div
-              style={{
-                width: "78px",
-                height: "78px",
-                margin: "0 auto 18px",
-                borderRadius: "20px",
-                background:
-                  "linear-gradient(135deg, #2563eb, #1e40af)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#fff",
-                fontSize: "28px",
-                boxShadow: "0 14px 35px rgba(37,99,235,0.45)",
-              }}
-            >
-              🔐
-            </div>
-            <h3 className="fw-bold mb-1">Forgot Password</h3>
-            <p className="text-muted">
-              Securely reset your account password
-            </p>
+      <div style={styles.container}>
+        <div style={styles.card}>
+          
+          {/* Header */}
+          <div style={styles.header}>
+            <div style={styles.iconBox}>🔐</div>
+            <h2 style={styles.title}>Forgot Password</h2>
+            <p style={styles.subtitle}>Securely reset your account password</p>
           </div>
 
-          {/* INFO MESSAGE */}
-          <div
-            className="mb-4"
-            style={{
-              background: "rgba(37,99,235,0.08)",
-              padding: "12px 16px",
-              borderRadius: "12px",
-              color: "#2563eb",
-              fontSize: "0.9rem",
-            }}
-          >
-            We’ll send a secure password reset link to your registered email.
+          {/* Info Message */}
+          <div style={styles.infoBox}>
+            We'll send a secure password reset link to your registered email.
           </div>
 
-          {/* ERROR */}
+          {/* Error Alert */}
           {error && (
-            <div
-              className="mb-3"
-              style={{
-                background: "rgba(220,38,38,0.1)",
-                color: "#dc2626",
-                padding: "12px",
-                borderRadius: "10px",
-                fontSize: "0.9rem",
-              }}
-            >
+            <div style={styles.errorBox}>
               {error}
             </div>
           )}
 
-          {/* SUCCESS */}
+          {/* Success Alert */}
           {message && (
-            <div
-              className="mb-3"
-              style={{
-                background: "rgba(22,163,74,0.1)",
-                color: "#16a34a",
-                padding: "12px",
-                borderRadius: "10px",
-                fontSize: "0.9rem",
-              }}
-            >
+            <div style={styles.successBox}>
               {message}
             </div>
           )}
 
-          {/* FORM */}
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label className="form-label fw-semibold">
-                Email Address
-              </label>
+          {/* Form */}
+          <form onSubmit={handleSubmit} style={styles.form}>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Email Address</label>
               <input
                 type="email"
-                className="form-control form-input"
+                style={styles.input}
                 placeholder="you@insurai.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                style={{
-                  borderRadius: "12px",
-                  padding: "12px",
-                }}
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="btn submit-btn w-100 fw-semibold"
-              style={{
-                background:
-                  "linear-gradient(135deg, #2563eb, #1e40af)",
-                color: "#fff",
-                borderRadius: "12px",
-                padding: "14px",
-                border: "none",
-                transition: "0.3s ease",
-              }}
+              style={styles.submitBtn}
             >
               {loading ? "Sending link..." : "Send Reset Link"}
             </button>
           </form>
 
-          {/* FOOTER */}
-          <div className="text-center mt-4">
+          {/* Footer */}
+          <div style={styles.footer}>
             <button
-              className="btn btn-link p-0 text-decoration-none fw-semibold"
-              style={{ color: "#2563eb" }}
+              style={styles.backButton}
               onClick={() => navigate("/employee/login")}
             >
               ← Back to Login
             </button>
-
-            <div className="mt-3 text-muted" style={{ fontSize: "0.8rem" }}>
+            <div style={styles.secureText}>
               🔒 Secure • Encrypted • Trusted
             </div>
           </div>
         </div>
+
+        {/* Background Orbs */}
+        <div style={styles.orbBlue} />
+        <div style={styles.orbPurple} />
       </div>
-    </>
+    </div>
   );
 }
+
+/* =========================
+   STYLES
+========================= */
+const styles = {
+  page: {
+    fontFamily: "Inter, system-ui, sans-serif",
+    background: theme.gradientMain,
+    minHeight: "100vh",
+    height: "100vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+
+  container: {
+    width: "100%",
+    maxWidth: "440px",
+    padding: "2rem",
+    position: "relative",
+  },
+
+  card: {
+    background: "rgba(15,23,42,0.85)",
+    backdropFilter: "blur(20px)",
+    border: `1px solid ${theme.border}`,
+    borderRadius: "24px",
+    padding: "2.5rem",
+    position: "relative",
+    zIndex: 2,
+    boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+  },
+
+  header: {
+    textAlign: "center",
+    marginBottom: "2rem",
+  },
+
+  iconBox: {
+    width: "80px",
+    height: "80px",
+    margin: "0 auto 1.2rem",
+    borderRadius: "20px",
+    background: theme.gradientNeon,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "32px",
+  },
+
+  title: {
+    fontSize: "1.8rem",
+    fontWeight: 700,
+    color: theme.textPrimary,
+    marginBottom: "0.5rem",
+  },
+
+  subtitle: {
+    color: theme.textSecondary,
+    fontSize: "0.95rem",
+  },
+
+  infoBox: {
+    background: "rgba(56,189,248,0.1)",
+    border: `1px solid rgba(56,189,248,0.2)`,
+    color: theme.neonBlue,
+    padding: "0.9rem 1rem",
+    borderRadius: "12px",
+    fontSize: "0.9rem",
+    marginBottom: "1.5rem",
+  },
+
+  errorBox: {
+    background: "rgba(239,68,68,0.1)",
+    border: "1px solid rgba(239,68,68,0.2)",
+    color: "#EF4444",
+    padding: "0.9rem 1rem",
+    borderRadius: "12px",
+    fontSize: "0.9rem",
+    marginBottom: "1.5rem",
+  },
+
+  successBox: {
+    background: "rgba(34,197,94,0.1)",
+    border: "1px solid rgba(34,197,94,0.2)",
+    color: "#22C55E",
+    padding: "0.9rem 1rem",
+    borderRadius: "12px",
+    fontSize: "0.9rem",
+    marginBottom: "1.5rem",
+  },
+
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "1.2rem",
+  },
+
+  formGroup: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.5rem",
+  },
+
+  label: {
+    fontSize: "0.9rem",
+    fontWeight: 600,
+    color: theme.textPrimary,
+  },
+
+  input: {
+    width: "100%",
+    padding: "0.9rem 1rem",
+    background: "rgba(2,6,23,0.6)",
+    border: `1px solid ${theme.border}`,
+    borderRadius: "12px",
+    color: theme.textPrimary,
+    fontSize: "0.95rem",
+    outline: "none",
+    transition: "all 0.3s",
+  },
+
+  submitBtn: {
+    marginTop: "0.5rem",
+    padding: "1rem",
+    background: theme.gradientNeon,
+    border: "none",
+    borderRadius: "12px",
+    color: "#020617",
+    fontSize: "1rem",
+    fontWeight: 700,
+    cursor: "pointer",
+    transition: "transform 0.2s",
+    boxShadow: "0 4px 15px rgba(56,189,248,0.3)",
+  },
+
+  footer: {
+    marginTop: "2rem",
+    textAlign: "center",
+  },
+
+  backButton: {
+    background: "transparent",
+    border: "none",
+    color: theme.neonBlue,
+    fontSize: "0.95rem",
+    fontWeight: 600,
+    cursor: "pointer",
+    marginBottom: "1rem",
+    transition: "color 0.2s",
+  },
+
+  secureText: {
+    color: theme.textSecondary,
+    fontSize: "0.85rem",
+  },
+
+  orbBlue: {
+    position: "absolute",
+    width: "300px",
+    height: "300px",
+    background: "rgba(56,189,248,0.15)",
+    filter: "blur(100px)",
+    top: "-100px",
+    left: "-100px",
+    zIndex: 0,
+  },
+
+  orbPurple: {
+    position: "absolute",
+    width: "300px",
+    height: "300px",
+    background: "rgba(129,140,248,0.15)",
+    filter: "blur(100px)",
+    bottom: "-100px",
+    right: "-100px",
+    zIndex: 0,
+  },
+};
