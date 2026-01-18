@@ -2,15 +2,21 @@ import React, { useState } from "react";
 import axios from "axios";
 
 export default function AgentRegister({ onBack }) {
-  const [newAgent, setNewAgent] = useState({ name: "", email: "", password: "" });
+  const [newAgent, setNewAgent] = useState({
+    name: "",
+    email: "",
+    password: ""
+  });
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
 
+  /* ================= VALIDATIONS ================= */
+
   const validateEmail = (email) =>
-    /^[a-zA-Z0-9._%+-]+@[a-zA-Z][a-zA-Z0-9-]*(\.[a-zA-Z]{2,})+$/.test(email);
+    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
 
   const checkPasswordStrength = (password) => {
     let strength = 0;
@@ -21,32 +27,67 @@ export default function AgentRegister({ onBack }) {
     setPasswordStrength(strength);
   };
 
+  const getPasswordStrengthColor = () => {
+    if (passwordStrength >= 75) return "bg-success";
+    if (passwordStrength >= 50) return "bg-warning";
+    if (passwordStrength >= 25) return "bg-danger";
+    return "bg-secondary";
+  };
+
+  const getPasswordStrengthText = () => {
+    if (passwordStrength >= 75) return "Strong";
+    if (passwordStrength >= 50) return "Medium";
+    if (passwordStrength >= 25) return "Weak";
+    return "Very Weak";
+  };
+
+  /* ================= INPUT HANDLERS ================= */
+
+  const handlePasswordChange = (e) => {
+    setNewAgent({ ...newAgent, password: e.target.value });
+    checkPasswordStrength(e.target.value);
+  };
+
+  /* ================= REGISTER AGENT ================= */
+
   const handleRegisterAgent = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     if (!validateEmail(newAgent.email)) {
-      setError("Enter a valid email address.");
+      setError("⚠️ Please enter a valid email address (e.g., user@example.com).");
       setLoading(false);
       return;
     }
 
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("Admin login required");
 
-      const res = await axios.post(
+      if (!token) {
+        setError("⚠️ Please login as Admin first.");
+        setLoading(false);
+        return;
+      }
+
+      const response = await axios.post(
         "http://localhost:8080/admin/agent/register",
         newAgent,
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { 
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          withCredentials: true,
+        }
       );
 
-      setSuccess(res.data);
+      setSuccess(response.data || "Agent registered successfully!");
       setError("");
       setNewAgent({ name: "", email: "", password: "" });
       setPasswordStrength(0);
     } catch (err) {
-      setError(err.response?.data || err.message);
+      console.error("Register Agent error:", err);
+      setError(err.response?.data || "Failed to register Agent");
       setSuccess("");
     } finally {
       setLoading(false);
@@ -54,242 +95,255 @@ export default function AgentRegister({ onBack }) {
   };
 
   return (
-    <div className="agent-page">
-      <div className="agent-card">
-        {/* Header */}
-        <div className="agent-header">
-          <div>
-            <h2>Register Agent</h2>
-            <p>Create and manage insurance agents securely</p>
+    <div className="agent-registration">
+      {/* Header Section */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 className="fw-bold text-gray-800 mb-1">
+            <i className="bi bi-person-badge me-2 text-primary"></i>
+            Register Insurance Agent
+          </h4>
+          <p className="text-gray-600 mb-0">Create a new agent account with customer service access</p>
+        </div>
+        <div className="text-end">
+          <div className="badge bg-primary">
+            <i className="bi bi-shield-check me-1"></i>
+            Admin Access Required
           </div>
-          <span className="admin-pill">ADMIN</span>
+        </div>
+      </div>
+
+      {/* Registration Card */}
+      <div className="card shadow-sm border-0">
+        <div className="card-header bg-white py-4 border-0">
+          <div className="text-center">
+            <div className="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                 style={{ width: "70px", height: "70px" }}>
+              <i className="bi bi-person-badge text-white fs-3"></i>
+            </div>
+            <h5 className="fw-bold text-gray-800 mb-2">Agent Registration</h5>
+            <p className="text-muted mb-0">Fill in the details to create a new agent account</p>
+          </div>
         </div>
 
-        {/* Alerts */}
-        {success && <div className="alert success">{success}</div>}
-        {error && <div className="alert error">{error}</div>}
-
-        {/* Form */}
-        <form onSubmit={handleRegisterAgent} className="agent-form">
-          <div className="field">
-            <input
-              type="text"
-              required
-              value={newAgent.name}
-              onChange={(e) => setNewAgent({ ...newAgent, name: e.target.value })}
-            />
-            <label>Full Name</label>
-          </div>
-
-          <div className="field">
-            <input
-              type="email"
-              required
-              value={newAgent.email}
-              onChange={(e) => setNewAgent({ ...newAgent, email: e.target.value })}
-            />
-            <label>Email Address</label>
-          </div>
-
-          <div className="field password-field">
-            <input
-              type={showPassword ? "text" : "password"}
-              required
-              value={newAgent.password}
-              onChange={(e) => {
-                setNewAgent({ ...newAgent, password: e.target.value });
-                checkPasswordStrength(e.target.value);
-              }}
-            />
-            <label>Password</label>
-            <span onClick={() => setShowPassword(!showPassword)}>
-              {showPassword ? "🙈" : "👁️"}
-            </span>
-          </div>
-
-          {/* Strength Bar */}
-          {newAgent.password && (
-            <div className="strength">
-              <div className="bar">
-                <div
-                  className={`fill ${
-                    passwordStrength >= 75
-                      ? "strong"
-                      : passwordStrength >= 50
-                      ? "medium"
-                      : "weak"
-                  }`}
-                  style={{ width: `${passwordStrength}%` }}
-                />
-              </div>
-              <small>
-                {passwordStrength >= 75
-                  ? "Strong"
-                  : passwordStrength >= 50
-                  ? "Medium"
-                  : "Weak"}{" "}
-                Password
-              </small>
+        <div className="card-body p-4 p-md-5">
+          {/* Success Message */}
+          {success && (
+            <div className="alert alert-success alert-dismissible fade show d-flex align-items-center mb-4" role="alert">
+              <i className="bi bi-check-circle-fill me-2 fs-5"></i>
+              <div className="flex-grow-1">{success}</div>
+              <button type="button" className="btn-close" onClick={() => setSuccess("")}></button>
             </div>
           )}
 
-          {/* Buttons */}
-          <div className="actions">
-            <button type="submit" disabled={loading || passwordStrength < 50}>
-              {loading ? "Registering..." : "Register Agent"}
-            </button>
-            <button type="button" className="ghost" onClick={onBack}>
-              Back
-            </button>
+          {/* Error Message */}
+          {error && (
+            <div className="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-4" role="alert">
+              <i className="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+              <div className="flex-grow-1">{error}</div>
+              <button type="button" className="btn-close" onClick={() => setError("")}></button>
+            </div>
+          )}
+
+          {/* Registration Form */}
+          <form onSubmit={handleRegisterAgent}>
+            {/* Full Name Field */}
+            <div className="mb-4">
+              <label className="form-label fw-semibold text-gray-700 mb-3">
+                <i className="bi bi-person me-2 text-primary"></i> 
+                Full Name
+              </label>
+              <div className="input-group input-group-lg">
+                <span className="input-group-text bg-light border-end-0">
+                  <i className="bi bi-person text-gray-500"></i>
+                </span>
+                <input
+                  type="text"
+                  className="form-control border-start-0 py-3"
+                  value={newAgent.name}
+                  onChange={(e) => setNewAgent({ ...newAgent, name: e.target.value })}
+                  required
+                  placeholder="Enter agent's full name"
+                />
+              </div>
+            </div>
+
+            {/* Email Field */}
+            <div className="mb-4">
+              <label className="form-label fw-semibold text-gray-700 mb-3">
+                <i className="bi bi-envelope me-2 text-primary"></i> 
+                Email Address
+              </label>
+              <div className="input-group input-group-lg">
+                <span className="input-group-text bg-light border-end-0">
+                  <i className="bi bi-at text-gray-500"></i>
+                </span>
+                <input
+                  type="email"
+                  className="form-control border-start-0 py-3"
+                  value={newAgent.email}
+                  onChange={(e) => setNewAgent({ ...newAgent, email: e.target.value })}
+                  required
+                  placeholder="Enter corporate email address"
+                />
+              </div>
+              <div className="form-text text-muted mt-2">
+                <i className="bi bi-info-circle me-1"></i>
+                Must be a valid corporate email address
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div className="mb-4">
+              <label className="form-label fw-semibold text-gray-700 mb-3">
+                <i className="bi bi-lock me-2 text-primary"></i> 
+                Password
+              </label>
+              <div className="input-group input-group-lg">
+                <span className="input-group-text bg-light border-end-0">
+                  <i className="bi bi-key text-gray-500"></i>
+                </span>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="form-control border-start-0 py-3"
+                  value={newAgent.password}
+                  onChange={handlePasswordChange}
+                  required
+                  placeholder="Create a secure password"
+                />
+                <button
+                  type="button"
+                  className="input-group-text bg-light border-start-0"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"} text-gray-500`}></i>
+                </button>
+              </div>
+
+              {/* Password Strength Meter */}
+              {newAgent.password && (
+                <div className="mt-3">
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <small className="fw-semibold text-gray-700">Password Strength</small>
+                    <small className={`fw-bold ${
+                      passwordStrength >= 75 ? "text-success" :
+                      passwordStrength >= 50 ? "text-warning" :
+                      "text-danger"
+                    }`}>
+                      {getPasswordStrengthText()}
+                    </small>
+                  </div>
+                  <div className="progress" style={{ height: "6px" }}>
+                    <div 
+                      className={`progress-bar ${getPasswordStrengthColor()}`}
+                      style={{ width: `${passwordStrength}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+
+              {/* Password Requirements */}
+              <div className="form-text text-muted mt-3">
+                <div className="row">
+                  <div className="col-6">
+                    <small className={`d-flex align-items-center mb-1 ${
+                      newAgent.password.length >= 8 ? "text-success" : "text-muted"
+                    }`}>
+                      <i className={`bi ${newAgent.password.length >= 8 ? "bi-check-circle-fill" : "bi-circle"} me-2`}></i>
+                      8+ characters
+                    </small>
+                    <small className={`d-flex align-items-center mb-1 ${
+                      /[A-Z]/.test(newAgent.password) ? "text-success" : "text-muted"
+                    }`}>
+                      <i className={`bi ${/[A-Z]/.test(newAgent.password) ? "bi-check-circle-fill" : "bi-circle"} me-2`}></i>
+                      Uppercase letter
+                    </small>
+                  </div>
+                  <div className="col-6">
+                    <small className={`d-flex align-items-center mb-1 ${
+                      /[0-9]/.test(newAgent.password) ? "text-success" : "text-muted"
+                    }`}>
+                      <i className={`bi ${/[0-9]/.test(newAgent.password) ? "bi-check-circle-fill" : "bi-circle"} me-2`}></i>
+                      Number
+                    </small>
+                    <small className={`d-flex align-items-center mb-1 ${
+                      /[^A-Za-z0-9]/.test(newAgent.password) ? "text-success" : "text-muted"
+                    }`}>
+                      <i className={`bi ${/[^A-Za-z0-9]/.test(newAgent.password) ? "bi-check-circle-fill" : "bi-circle"} me-2`}></i>
+                      Special character
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="d-flex gap-3 mt-4 pt-3">
+              <button
+                type="submit"
+                className="btn btn-primary flex-fill fw-semibold py-3 rounded-2 shadow-sm"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2"></span>
+                    Registering Agent...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-person-plus me-2"></i>
+                    Register Agent
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline-secondary fw-semibold py-3 rounded-2"
+                onClick={onBack}
+                disabled={loading}
+              >
+                <i className="bi bi-arrow-left me-2"></i>
+                Back to Users
+              </button>
+            </div>
+          </form>
+
+          {/* Security Notice */}
+          <div className="alert alert-light border mt-4 text-center">
+            <small className="text-muted">
+              <i className="bi bi-shield-check me-1 text-success"></i>
+              Agents will have access to customer service and policy assistance
+            </small>
           </div>
-        </form>
+        </div>
       </div>
 
-      {/* CSS */}
-      <style>{`
-        .agent-page {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: linear-gradient(135deg, #0f172a, #020617);
-          padding: 2rem;
-          animation: fade 0.6s ease;
+      <style jsx>{`
+        .agent-registration {
+          animation: fadeIn 0.5s ease-in;
         }
-
-        .agent-card {
-          width: 100%;
-          max-width: 520px;
-          background: rgba(255,255,255,0.08);
-          backdrop-filter: blur(18px);
-          border-radius: 20px;
-          padding: 2.5rem;
-          box-shadow: 0 30px 80px rgba(0,0,0,0.5);
-          color: #fff;
+        
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
-
-        .agent-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 2rem;
+        
+        .card {
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
-        .agent-header h2 {
-          font-size: 1.8rem;
-          margin-bottom: 0.2rem;
-        }
-
-        .agent-header p {
-          opacity: 0.7;
-          font-size: 0.9rem;
-        }
-
-        .admin-pill {
-          background: linear-gradient(135deg, #6366f1, #4f46e5);
-          padding: 0.4rem 0.9rem;
-          border-radius: 999px;
-          font-size: 0.75rem;
-          font-weight: 600;
-        }
-
-        .alert {
-          padding: 0.8rem 1rem;
-          border-radius: 10px;
-          margin-bottom: 1rem;
-          font-size: 0.9rem;
-        }
-
-        .alert.success { background: rgba(34,197,94,0.2); }
-        .alert.error { background: rgba(239,68,68,0.2); }
-
-        .agent-form .field {
-          position: relative;
-          margin-bottom: 1.6rem;
-        }
-
-        .field input {
-          width: 100%;
-          padding: 1rem;
-          border-radius: 12px;
-          border: none;
-          outline: none;
-          background: rgba(255,255,255,0.15);
-          color: white;
-        }
-
-        .field label {
-          position: absolute;
-          top: 50%;
-          left: 14px;
-          transform: translateY(-50%);
-          font-size: 0.85rem;
-          opacity: 0.6;
-          pointer-events: none;
-          transition: 0.3s;
-        }
-
-        .field input:focus + label,
-        .field input:not(:placeholder-shown) + label {
-          top: -8px;
-          font-size: 0.7rem;
-          opacity: 1;
-        }
-
-        .password-field span {
-          position: absolute;
-          right: 14px;
-          top: 50%;
-          transform: translateY(-50%);
-          cursor: pointer;
-        }
-
-        .strength {
-          margin-bottom: 1.5rem;
-        }
-
-        .bar {
-          height: 6px;
-          background: rgba(255,255,255,0.2);
-          border-radius: 6px;
-          overflow: hidden;
-        }
-
-        .fill {
-          height: 100%;
-          transition: width 0.3s ease;
-        }
-
-        .fill.strong { background: #22c55e; }
-        .fill.medium { background: #facc15; }
-        .fill.weak { background: #ef4444; }
-
-        .actions {
-          display: flex;
-          gap: 1rem;
-        }
-
-        button {
-          flex: 1;
-          padding: 0.9rem;
-          border-radius: 12px;
-          border: none;
-          font-weight: 600;
-          cursor: pointer;
-          background: linear-gradient(135deg, #6366f1, #4f46e5);
-          color: white;
-        }
-
-        button.ghost {
-          background: transparent;
-          border: 1px solid rgba(255,255,255,0.3);
-        }
-
-        @keyframes fade {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
+        
+        .card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
         }
       `}</style>
     </div>
   );
 }
+

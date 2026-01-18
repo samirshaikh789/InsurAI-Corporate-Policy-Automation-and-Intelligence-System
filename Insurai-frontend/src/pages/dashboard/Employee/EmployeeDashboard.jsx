@@ -539,12 +539,15 @@ export default function EmployeeDashboard() {
   // ------------------ Enhanced Home Dashboard with Advanced UI ------------------
   const renderEnhancedHomeDashboard = () => (
     <div className="container-fluid">
+          {/* ================= KPI HERO STRIP ================= */}
+   
+
       {/* Enhanced Header Section */}
       <div className="row mb-4">
         <div className="col-12">
           <div className="d-flex justify-content-between align-items-start">
             <div>
-              <h2 className="fw-bold text-gradient mb-2">Employee Dashboard</h2>
+              <h2 className="fw-bold text-primary mb-2">Employee Dashboard</h2>
               <div className="d-flex align-items-center gap-3">
                 <span className="text-muted">
                   <i className="bi bi-person-badge me-1"></i>
@@ -557,7 +560,7 @@ export default function EmployeeDashboard() {
               </div>
             </div>
             <div className="text-end">
-              <div className="bg-light rounded p-3 border shadow-sm">
+              <div className="bg-warning bg-opacity-10 rounded-4 p-3 border shadow-sm">
                 <div className="fw-bold text-primary">
                   {currentTime.toLocaleDateString('en-IN', { 
                     weekday: 'long', 
@@ -580,16 +583,58 @@ export default function EmployeeDashboard() {
           </div>
         </div>
       </div>
+       <div className="row mb-4">
+      <div className="col-12">
+        <div className="kpi-strip">
+          <div className="kpi-item">
+            <span>Total Coverage</span>
+            <h3>₹{(dashboardStats.totalCoverage / 100000).toFixed(1)}L</h3>
+          </div>
+
+          <div className="kpi-item">
+            <span>Total Claims</span>
+            <h3>₹{dashboardStats.totalClaimsAmount.toLocaleString("en-IN")}</h3>
+          </div>
+
+          <div className="kpi-item">
+            <span>Efficiency</span>
+            <h3>{dashboardStats.efficiencyScore}%</h3>
+          </div>
+
+          <div className="kpi-item danger">
+            <span>Risk Index</span>
+            <h3>{dashboardStats.riskScore}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+    {/* ================= SYSTEM INSIGHT ================= */}
+    <div className="row mb-4">
+      <div className="col-12">
+        <div className="ai-insight">
+          <i className="bi bi-lightning-charge-fill"></i>
+          {/* <div> */}
+            <strong>System Insight:</strong>
+            <span>
+              {dashboardStats.pendingClaims > 3
+                ? " Higher than normal pending claims detected."
+                : " System performance is within optimal range."}
+            </span>
+          {/* </div> */}
+        </div>
+      </div>
+    </div>
 
       {/* Enhanced Statistics Cards with Advanced Metrics */}
       <div className="row mb-4">
         <div className="col-xl-2 col-md-4 col-6 mb-4">
-          <div className="card border-0 shadow-sm h-100 dashboard-card bg-primary bg-opacity-10">
+          <div className="card border-0 shadow-sm h-100 dashboard-card bg-info bg-opacity-10 rounded-4">
             <div className="card-body text-center">
               <div className="bg-primary bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{width: '60px', height: '60px'}}>
                 <i className="bi bi-shield-check text-primary fs-4"></i>
               </div>
-              <h3 className="text-primary mb-1">{dashboardStats.activePolicies}</h3>
+              {/* <h3 className="text-primary mb-1">{dashboardStats.activePolicies}</h3> */}
+              <h3 className="fw-bold display-6 text-primary mb-1">{dashboardStats.activePolicies}</h3>
               <div className="text-muted mb-2">Active Policies</div>
               <small className="text-primary">
                 <i className="bi bi-currency-rupee me-1"></i>
@@ -600,7 +645,7 @@ export default function EmployeeDashboard() {
         </div>
 
         <div className="col-xl-2 col-md-4 col-6 mb-4">
-          <div className="card border-0 shadow-sm h-100 dashboard-card bg-warning bg-opacity-10">
+          <div className="card border-0 shadow-sm h-100 dashboard-card bg-warning bg-opacity-10 rounded-4">
             <div className="card-body text-center">
               <div className="bg-warning bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{width: '60px', height: '60px'}}>
                 <i className="bi bi-clock-history text-warning fs-4"></i>
@@ -616,7 +661,7 @@ export default function EmployeeDashboard() {
         </div>
 
         <div className="col-xl-2 col-md-4 col-6 mb-4">
-          <div className="card border-0 shadow-sm h-100 dashboard-card bg-success bg-opacity-10">
+          <div className="card border-0 shadow-sm h-100 dashboard-card bg-success bg-opacity-10 rounded-4">
             <div className="card-body text-center">
               <div className="bg-success bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{width: '60px', height: '60px'}}>
                 <i className="bi bi-chat-left-text text-success fs-4"></i>
@@ -632,7 +677,7 @@ export default function EmployeeDashboard() {
         </div>
 
         <div className="col-xl-2 col-md-4 col-6 mb-4">
-          <div className="card border-0 shadow-sm h-100 dashboard-card bg-info bg-opacity-10">
+          <div className="card border-0 shadow-sm h-100 dashboard-card bg-info bg-opacity-10 rounded-4">
             <div className="card-body text-center">
               <div className="bg-info bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{width: '60px', height: '60px'}}>
                 <i className="bi bi-calendar-event text-info fs-4"></i>
@@ -648,7 +693,7 @@ export default function EmployeeDashboard() {
         </div>
 
         <div className="col-xl-2 col-md-4 col-6 mb-4">
-          <div className="card border-0 shadow-sm h-100 dashboard-card bg-danger bg-opacity-10">
+          <div className="card border-0 shadow-sm h-100 dashboard-card bg-danger bg-opacity-10 rounded-4">
             <div className="card-body text-center">
               <div className="bg-danger bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{width: '60px', height: '60px'}}>
                 <i className="bi bi-activity text-danger fs-4"></i>
@@ -664,7 +709,7 @@ export default function EmployeeDashboard() {
         </div>
 
         <div className="col-xl-2 col-md-4 col-6 mb-4">
-          <div className="card border-0 shadow-sm h-100 dashboard-card bg-secondary bg-opacity-10">
+          <div className="card border-0 shadow-sm h-100 dashboard-card bg-secondary bg-opacity-10 rounded-4">
             <div className="card-body text-center">
               <div className="bg-secondary bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{width: '60px', height: '60px'}}>
                 <i className="bi bi-graph-up-arrow text-secondary fs-4"></i>
@@ -924,7 +969,7 @@ return (
               <a
                 href="#"
                 key={link.tab}
-                className={`nav-link sidebar-link mb-2 ${activeTab === link.tab ? 'active' : ''}`}
+                className={`nav-link sidebar-link ${activeTab === link.tab ? 'active' : ''}`}
                 onClick={(e) => {
                   e.preventDefault();
                   handleTabChange(link.tab);
@@ -949,7 +994,7 @@ return (
               </div>
               <span>System Online</span>
             </div>
-            <div>v2.0.1 • Employee Suite</div>
+            {/* <div>v2.0.1 • Employee Suite</div> */}
           </div>
         </aside>
 
@@ -1028,36 +1073,36 @@ return (
 
         /* Header Gradient */
         .employee-dashboard .dashboard-header {
-          background: linear-gradient(135deg, #1b262c 0%, #206c95ff 100%);
+          background: linear-gradient(135deg, #a43335 0%, rgb(50, 81, 97) 100%);
         }
 
         /* Sidebar */
         .dashboard-sidebar {
           width: 250px;
           min-height: 100vh;
-          background: #f8f9fa;
+          background: #e6e9ed;
           transition: all 0.3s ease;
         }
 
         .sidebar-link {
-          border-radius: 8px;
+          border-radius: 25px;
           margin-bottom: 5px;
           padding: 12px 15px;
           display: flex;
           align-items: center;
-          color: #495057;
+          color: #313437;
           transition: all 0.3s ease;
         }
 
         .sidebar-link:hover {
           background-color: #ffffff;
-          color: #0d6efd;
-          transform: translateX(5px);
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          color: #ff0000;
+          transform: translateX(10px);
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         .sidebar-link.active {
-          background: linear-gradient(135deg, #1b262c  0%, #206c95ff 100%);
+          background: linear-gradient(135deg, #1b262c  0%, rgb(54, 125, 163) 100%);
           color: white;
           font-weight: 600;
           box-shadow: 0 4px 15px rgba(0,123,255,0.3);
@@ -1069,13 +1114,13 @@ return (
 
         /* Enhanced Cards with Theme Colors */
         .dashboard-card {
-          transition: all 0.3s ease;
+          transition: all 0.2s ease;
           border: none;
         }
 
         .dashboard-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+          transform: translateY(-15px);
+          box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
 
         /* Progress Bars with Theme Colors */
@@ -1205,6 +1250,46 @@ return (
           -webkit-text-fill-color: transparent;
           background-clip: text;
         }
+          /* ================= KPI STRIP – HORIZONTAL ================= */
+
+.kpi-strip {
+  display: flex;
+  gap: 24px;
+  padding: 20px 24px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #1b262c, #863636);
+  color: white;
+
+  /* horizontal behavior */
+  overflow-x: auto;
+  scrollbar-width: none;        /* Firefox */
+}
+
+.kpi-strip::-webkit-scrollbar {
+  display: none;                /* Chrome */
+}
+
+.kpi-item {
+  min-width: 220px;             /* IMPORTANT */
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.kpi-item span {
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.kpi-item h3 {
+  margin-top: 6px;
+  font-size: 1.9rem;
+  font-weight: 700;
+}
+
+.kpi-item.danger h3 {
+  color: #ffb3b3;
+}
+
       `}</style>
     </div>
   );

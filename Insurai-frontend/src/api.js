@@ -1,13 +1,17 @@
 import axios from "axios";
 
+// API Configuration
+const BASE_URL = "http://localhost:8080";
+
 const API = axios.create({
-  baseURL: "http://localhost:8080", // backend base URL (no /api)
+  baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
+  timeout: 15000, // 15 second timeout
 });
 
-// Automatically attach token to every request
+// Request Interceptor - Attach auth token
 API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -16,7 +20,29 @@ API.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response Interceptor - Handle common errors
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle 401 Unauthorized - session expired
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("name");
+      localStorage.removeItem("adminLoggedIn");
+      
+      // Redirect to home if not already there
+      if (window.location.hash !== "#/") {
+        window.location.hash = "#/";
+      }
+    }
+    return Promise.reject(error);
+  }
 );
 
 export default API;

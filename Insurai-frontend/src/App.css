@@ -1,23 +1,74 @@
+/* ===========================
+   App Container
+=========================== */
 #root {
   width: 100%;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
+/* ===========================
+   Links
+=========================== */
 a {
   color: var(--primary);
   text-decoration: none;
   font-weight: 500;
+  transition: color 0.2s ease;
 }
 
+a:hover {
+  color: var(--primary-light);
+}
+
+/* ===========================
+   Buttons
+=========================== */
 button {
   font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
+button:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ===========================
+   Custom Scrollbar
+=========================== */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ===========================
+   Selection
+=========================== */
+::selection {
+  background: var(--primary);
+  color: white;
+}
+
+/* ===========================
+   Focus States
+=========================== */
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }

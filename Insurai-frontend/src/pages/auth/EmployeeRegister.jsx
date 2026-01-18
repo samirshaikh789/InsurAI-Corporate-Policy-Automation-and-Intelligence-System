@@ -1,45 +1,23 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { motion } from "framer-motion";
-
-/* ======================
-   DESIGN TOKENS
-====================== */
-const theme = {
-  bg: "#020617",
-  surface: "rgba(15,23,42,0.65)",
-  border: "rgba(148,163,184,0.15)",
-
-  textPrimary: "#F8FAFC",
-  textSecondary: "#94A3B8",
-
-  neonBlue: "#38BDF8",
-  neonPurple: "#818CF8",
-  neonPink: "#F472B6",
-
-  gradient: "linear-gradient(135deg, #38BDF8, #818CF8, #F472B6)",
-  glow: "0 0 40px rgba(56,189,248,0.35)",
-};
+import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function EmployeeRegister() {
-  const [employeeId, setEmployeeId] = useState("");
+  const [employeeId, setEmployeeId] = useState(""); 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
   const navigate = useNavigate();
-
-  const validateEmail = (email) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
+    // Basic validation
     if (!employeeId || !name || !email || !password) {
       setMessage("All fields are required");
       setLoading(false);
@@ -47,13 +25,13 @@ export default function EmployeeRegister() {
     }
 
     if (password.length < 6) {
-      setMessage("Password must be at least 6 characters");
+      setMessage("Password must be at least 6 characters long");
       setLoading(false);
       return;
     }
 
     if (!validateEmail(email)) {
-      setMessage("Enter a valid email address");
+      setMessage("Please enter a valid email address");
       setLoading(false);
       return;
     }
@@ -62,256 +40,214 @@ export default function EmployeeRegister() {
       const res = await fetch("http://localhost:8080/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: JSON.stringify({ 
           employeeId: employeeId.trim(),
           name: name.trim(),
           email: email.trim().toLowerCase(),
-          password,
-        }),
+          password: password 
+        }), 
       });
 
-      const data = await res.json();
+      let responseData;
+      const contentType = res.headers.get("content-type");
+      
+      if (contentType && contentType.includes("application/json")) {
+        responseData = await res.json();
+      } else {
+        const text = await res.text();
+        responseData = { message: text };
+      }
 
       if (res.ok) {
-        setMessage("Registration successful! Redirecting...");
-        setTimeout(() => navigate("/employee/login"), 2000);
+        setMessage("Registration successful! Redirecting to login...");
+        
+        // Store employee info in localStorage
+        localStorage.setItem("employeeId", employeeId);
+        localStorage.setItem("name", name);
+        localStorage.setItem("email", email);
+        if (responseData.token) {
+          localStorage.setItem("token", responseData.token);
+        }
+
+        // Redirect to login after short delay
+        setTimeout(() => {
+          navigate("/employee/login");
+        }, 2000);
       } else {
-        setMessage(data.message || "Registration failed");
+        // Handle 400 Bad Request and other errors
+        if (res.status === 400) {
+          if (responseData.message && responseData.message.toLowerCase().includes("employee")) {
+            setMessage("Employee ID already exists. Please use a different ID.");
+          } else if (responseData.message && responseData.message.toLowerCase().includes("email")) {
+            setMessage("Email address already registered. Please use a different email.");
+          } else {
+            setMessage(responseData.message || "Invalid registration data. Please check your information.");
+          }
+        } else {
+          setMessage(responseData.message || "Registration failed. Please try again.");
+        }
       }
-    } catch {
-      setMessage("Network error. Try again.");
+    } catch (err) {
+      console.error("Registration error:", err);
+      setMessage("Network error. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
   return (
-    <div style={styles.page}>
-      {/* BACKGROUND GLOWS */}
-      <div style={styles.orbBlue} />
-      <div style={styles.orbPurple} />
-
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7 }}
-        style={styles.card}
+    <div
+      className="d-flex justify-content-center align-items-center"
+      style={{
+        minHeight: "100vh",
+        width: "100vw",
+        overflowX: "hidden",
+        background:
+          "radial-gradient(circle at top, #020617, #0f172a, #020617)",
+      }}
+    >
+      <div
+        className="card shadow-lg border-0 mx-auto"
+        style={{
+          maxWidth: "1000px",
+          width: "95%",
+          borderRadius: "22px",
+          overflow: "hidden",
+        }}
       >
-        <div style={styles.brand}>
-          Insur<span style={styles.brandAccent}>AI</span>
-        </div>
-
-        <h2 style={styles.title}>Create Employee Account</h2>
-        <p style={styles.subtitle}>
-          Secure onboarding for AI-powered insurance platform
-        </p>
-
-        {message && (
+        <div className="row g-0 m-0 w-100">
+          {/* LEFT PANEL */}
           <div
+            className="col-md-6 d-none d-md-flex"
             style={{
-              ...styles.alert,
-              color: message.includes("successful") ? "#16A34A" : "#DC2626",
+              background:
+                "linear-gradient(135deg, #020617, #1e3a8a, #0369a1)",
+              color: "white",
             }}
           >
-            {message}
-          </div>
-        )}
+            <div className="p-5 d-flex flex-column justify-content-between">
+              <div>
+                <h2 className="fw-bold mb-3">
+                  Smart Insurance <br />
+                  <span style={{ color: "#22d3ee" }}>Powered by AI</span>
+                </h2>
+                <p className="opacity-75">
+                  Create your employee account and access AI-powered
+                  insurance analytics.
+                </p>
 
-        <form onSubmit={handleRegister}>
-          <input
-            placeholder="Employee ID"
-            value={employeeId}
-            onChange={(e) => setEmployeeId(e.target.value)}
-            style={styles.input}
-          />
+                <ul className="list-unstyled mt-4">
+                  <li className="mb-2">✔ Secure JWT Authentication</li>
+                  <li className="mb-2">✔ AI Risk Prediction</li>
+                  <li className="mb-2">✔ Enterprise Dashboard</li>
+                </ul>
+              </div>
 
-          <input
-            placeholder="Full Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            style={styles.input}
-          />
-
-          <input
-            placeholder="Email Address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={styles.input}
-          />
-
-          <div style={{ position: "relative" }}>
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password (min 6 chars)"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{ ...styles.input, paddingRight: "3rem" }}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              style={styles.eye}
-            >
-              {showPassword ? "🙈" : "👁️"}
-            </button>
+              <small className="opacity-75">
+                Used by 10,000+ professionals worldwide
+              </small>
+            </div>
           </div>
 
-          <motion.button
-            whileHover={{ scale: 1.03, boxShadow: theme.glow }}
-            whileTap={{ scale: 0.97 }}
-            disabled={loading}
-            type="submit"
-            style={styles.submit}
-          >
-            {loading ? "Creating account..." : "Create Account"}
-          </motion.button>
-        </form>
+          {/* RIGHT PANEL */}
+          <div className="col-md-6 bg-light">
+            <div className="p-4 p-md-5">
+              <div className="text-center mb-4">
+                <h3 className="fw-bold">Create Account</h3>
+                <p className="text-muted">
+                  Register to access InsurAI platform
+                </p>
+              </div>
 
-        <p style={styles.footer}>
-          Already registered?{" "}
-          <Link to="/employee/login" style={styles.link}>
-            Sign in
-          </Link>
-        </p>
+              {message && (
+                <div
+                  className={`alert ${
+                    message.includes("successful")
+                      ? "alert-success"
+                      : "alert-danger"
+                  }`}
+                >
+                  {message}
+                </div>
+              )}
 
-        <small style={styles.secure}>
-          🔐 Enterprise Security • GDPR Compliant
-        </small>
-      </motion.div>
+              <form onSubmit={handleRegister}>
+                <input
+                  className="form-control mb-3"
+                  placeholder="Employee ID"
+                  value={employeeId}
+                  onChange={(e) => setEmployeeId(e.target.value)}
+                />
+
+                <input
+                  className="form-control mb-3"
+                  placeholder="Full Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+
+                <input
+                  className="form-control mb-3"
+                  placeholder="Email Address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+
+                <div className="position-relative mb-3">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    className="form-control"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="btn btn-link position-absolute top-50 end-0 translate-middle-y"
+                  >
+                    {showPassword ? "🙈" : "👁️"}
+                  </button>
+                </div>
+
+                <button
+                  type="submit"
+                  className="btn w-100 text-white fw-semibold"
+                  disabled={loading}
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #2563eb, #0ea5e9)",
+                  }}
+                >
+                  {loading ? "Creating..." : "Create Account"}
+                </button>
+              </form>
+
+              <div className="text-center mt-4">
+                <small className="text-muted">
+                  Already have an account?{" "}
+                  <Link to="/employee/login">Sign in</Link>
+                </small>
+              </div>
+
+              <div className="text-center mt-3">
+                <small className="text-muted">
+                  🔐 Secure JWT Authentication
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-/* ======================
-   STYLES
-====================== */
-const styles = {
-  page: {
-    minHeight: "100vh",
-    background: theme.bg,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-    overflow: "hidden",
-    fontFamily: "Inter, system-ui",
-  },
 
-  orbBlue: {
-    position: "absolute",
-    width: 400,
-    height: 400,
-    background: "rgba(56,189,248,0.25)",
-    filter: "blur(140px)",
-    top: "10%",
-    left: "-10%",
-  },
 
-  orbPurple: {
-    position: "absolute",
-    width: 400,
-    height: 400,
-    background: "rgba(129,140,248,0.25)",
-    filter: "blur(160px)",
-    bottom: "10%",
-    right: "-10%",
-  },
 
-  card: {
-    width: "100%",
-    maxWidth: 460,
-    padding: "2.8rem",
-    background: theme.surface,
-    backdropFilter: "blur(18px)",
-    border: `1px solid ${theme.border}`,
-    borderRadius: 24,
-    color: theme.textPrimary,
-    zIndex: 2,
-  },
-
-  brand: {
-    fontSize: "1.6rem",
-    fontWeight: 800,
-    textAlign: "center",
-  },
-
-  brandAccent: {
-    background: theme.gradient,
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-  },
-
-  title: {
-    marginTop: "1rem",
-    fontSize: "1.7rem",
-    textAlign: "center",
-  },
-
-  subtitle: {
-    textAlign: "center",
-    color: theme.textSecondary,
-    marginBottom: "1.8rem",
-    fontSize: "0.9rem",
-  },
-
-  alert: {
-    textAlign: "center",
-    marginBottom: "1rem",
-    fontSize: "0.85rem",
-  },
-
-  input: {
-    width: "100%",
-    padding: "0.9rem 1rem",
-    marginBottom: "1.2rem",
-    borderRadius: 12,
-    background: "rgba(2,6,23,0.6)",
-    color: theme.textPrimary,
-    border: `1px solid ${theme.border}`,
-    outline: "none",
-  },
-
-  eye: {
-    position: "absolute",
-    right: 12,
-    top: "50%",
-    transform: "translateY(-50%)",
-    background: "none",
-    border: "none",
-    color: theme.textSecondary,
-    cursor: "pointer",
-  },
-
-  submit: {
-    width: "100%",
-    padding: "0.9rem",
-    borderRadius: 14,
-    border: "none",
-    background: theme.gradient,
-    color: "#020617",
-    fontWeight: 700,
-    cursor: "pointer",
-    marginTop: "0.5rem",
-  },
-
-  footer: {
-    marginTop: "1.5rem",
-    textAlign: "center",
-    fontSize: "0.85rem",
-    color: theme.textSecondary,
-  },
-
-  link: {
-    color: theme.neonBlue,
-    textDecoration: "none",
-    fontWeight: 600,
-  },
-
-  secure: {
-    display: "block",
-    marginTop: "1rem",
-    textAlign: "center",
-    fontSize: "0.75rem",
-    color: theme.textSecondary,
-  },
-};

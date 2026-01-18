@@ -1,10 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
-import "bootstrap/dist/css/bootstrap.min.css";  // <-- Must be here
+
+// Styles
+import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 
-ReactDOM.createRoot(document.getElementById("root")).render(
+// Mount the application
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+root.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>

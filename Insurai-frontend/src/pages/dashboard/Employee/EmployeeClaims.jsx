@@ -317,7 +317,7 @@ const fetchClaims = async () => {
       {/* Enhanced Stats Cards */}
       <div className="row mb-4">
         <div className="col-xl-2 col-md-4 mb-3">
-          <div className="card border-left-primary shadow-sm h-100 py-2">
+          <div className="card border-left-primary shadow-sm h-100 py-2 rounded-4">
             <div className="card-body">
               <div className="d-flex align-items-center">
                 <div className="flex-grow-1">
@@ -334,7 +334,7 @@ const fetchClaims = async () => {
           </div>
         </div>
         <div className="col-xl-2 col-md-4 mb-3">
-          <div className="card border-left-success shadow-sm h-100 py-2">
+          <div className="card border-left-success shadow-sm h-100 py-2 rounded-4">
             <div className="card-body">
               <div className="d-flex align-items-center">
                 <div className="flex-grow-1">
@@ -351,7 +351,7 @@ const fetchClaims = async () => {
           </div>
         </div>
         <div className="col-xl-2 col-md-4 mb-3">
-          <div className="card border-left-warning shadow-sm h-100 py-2">
+          <div className="card border-left-warning shadow-sm h-100 py-2 rounded-4">
             <div className="card-body">
               <div className="d-flex align-items-center">
                 <div className="flex-grow-1">
@@ -368,7 +368,7 @@ const fetchClaims = async () => {
           </div>
         </div>
         <div className="col-xl-3 col-md-6 mb-3">
-          <div className="card border-left-info shadow-sm h-100 py-2">
+          <div className="card border-left-info shadow-sm h-100 py-2 rounded-4">
             <div className="card-body">
               <div className="d-flex align-items-center">
                 <div className="flex-grow-1">
@@ -387,7 +387,7 @@ const fetchClaims = async () => {
           </div>
         </div>
         <div className="col-xl-3 col-md-6 mb-3">
-          <div className="card border-left-secondary shadow-sm h-100 py-2">
+          <div className="card border-left-secondary shadow-sm h-100 py-2 rounded-4">
             <div className="card-body">
               <div className="d-flex align-items-center">
                 <div className="flex-grow-1">
@@ -731,10 +731,7 @@ const renderNewClaimForm = () => {
   }
 
   // Check if submit should be disabled
-  const isSubmitDisabled =
-  loading ||
-  (remainingCoverage > 0 && newClaim.amount > remainingCoverage);
-
+  const isSubmitDisabled = newClaim.amount > remainingCoverage || loading;
 
   return (
     <div className="container-fluid">

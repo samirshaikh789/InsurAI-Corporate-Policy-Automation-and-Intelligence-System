@@ -1,20 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 
-/* =========================
-   THEME (from Homepage)
-========================= */
-const theme = {
-  bg: "#020617",
-  surface: "rgba(15,23,42,0.65)",
-  border: "rgba(148,163,184,0.15)",
-  textPrimary: "#F8FAFC",
-  textSecondary: "#94A3B8",
-  neonBlue: "#38BDF8",
-  neonPurple: "#818CF8",
-  gradientNeon: "linear-gradient(135deg, #38BDF8 0%, #818CF8 50%, #F472B6 100%)",
-};
-
 const Chatbot = ({ employeeData = { name: 'Employee', claims: [], policies: [] } }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
@@ -101,37 +87,150 @@ const Chatbot = ({ employeeData = { name: 'Employee', claims: [], policies: [] }
     if (e.key === 'Enter') handleSendMessage(e);
   };
 
+  // Updated styles with employee theme
+  const styles = {
+    chatIcon: {
+      position: 'fixed',
+      bottom: '25px',
+      right: '25px',
+      width: '60px',
+      height: '60px',
+      background: 'linear-gradient(135deg, #1b262c 0%, #206c95 100%)',
+      color: 'white',
+      borderRadius: '50%',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      fontSize: '24px',
+      cursor: 'pointer',
+      boxShadow: '0 4px 12px rgba(27, 38, 44, 0.3)',
+      zIndex: 1000,
+      border: '2px solid rgba(255, 255, 255, 0.1)',
+      transition: 'all 0.3s ease'
+    },
+    chatWindow: {
+      position: 'fixed',
+      bottom: '100px',
+      right: '25px',
+      width: '380px',
+      height: '500px',
+      background: 'white',
+      borderRadius: '16px',
+      boxShadow: '0 8px 24px rgba(27, 38, 44, 0.25)',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+      zIndex: 1000,
+      border: '1px solid rgba(32, 108, 149, 0.1)'
+    },
+    header: {
+      background: 'linear-gradient(135deg, #1b262c 0%, #206c95 100%)',
+      color: 'white',
+      padding: '1.2rem',
+      fontWeight: '600',
+      textAlign: 'center',
+      fontSize: '1.1rem',
+      letterSpacing: '0.5px'
+    },
+    body: {
+      flex: 1,
+      padding: '1.2rem',
+      overflowY: 'auto',
+      background: 'linear-gradient(135deg, #f8fafc 0%, #e8f4fd 100%)'
+    },
+    message: {
+      marginBottom: '1rem',
+      maxWidth: '85%',
+      padding: '0.8rem 1rem',
+      borderRadius: '18px',
+      lineHeight: '1.4',
+      whiteSpace: 'pre-wrap',
+      fontSize: '0.95rem',
+      boxShadow: '0 2px 6px rgba(0,0,0,0.08)'
+    },
+    botMessage: {
+      background: 'linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%)',
+      color: '#1b262c',
+      alignSelf: 'flex-start',
+      border: '1px solid rgba(32, 108, 149, 0.1)'
+    },
+    userMessage: {
+      background: 'linear-gradient(135deg, #1b262c 0%, #206c95 100%)',
+      color: 'white',
+      marginLeft: 'auto',
+      border: '1px solid rgba(255, 255, 255, 0.1)'
+    },
+    footer: {
+      padding: '0.8rem',
+      borderTop: '1px solid rgba(32, 108, 149, 0.1)',
+      background: 'white'
+    },
+    form: {
+      display: 'flex',
+      gap: '0.6rem',
+      alignItems: 'center'
+    },
+    input: {
+      flex: 1,
+      padding: '0.8rem 1rem',
+      border: '1px solid rgba(32, 108, 149, 0.2)',
+      borderRadius: '24px',
+      outline: 'none',
+      fontSize: '0.95rem',
+      background: '#f8fafc',
+      transition: 'all 0.3s ease',
+      color: '#1b262c', // Fixed: Added text color
+      fontFamily: 'inherit'
+    },
+    button: {
+      padding: '0.8rem 1.2rem',
+      border: 'none',
+      background: 'linear-gradient(135deg, #1b262c 0%, #206c95 100%)',
+      color: 'white',
+      borderRadius: '24px',
+      cursor: 'pointer',
+      fontSize: '0.95rem',
+      fontWeight: '500',
+      transition: 'all 0.3s ease',
+      boxShadow: '0 2px 6px rgba(27, 38, 44, 0.2)'
+    },
+    loading: {
+      fontStyle: 'italic',
+      color: '#206c95',
+      marginBottom: '1rem',
+      padding: '0.8rem',
+      background: 'rgba(32, 108, 149, 0.1)',
+      borderRadius: '12px',
+      textAlign: 'center',
+      fontSize: '0.9rem'
+    }
+  };
+
   return (
     <>
-      {/* Chat Icon */}
       <div 
         style={styles.chatIcon} 
         onClick={() => setIsOpen(!isOpen)}
+        onMouseEnter={(e) => {
+          e.target.style.transform = 'scale(1.1)';
+          e.target.style.boxShadow = '0 6px 16px rgba(27, 38, 44, 0.4)';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.transform = 'scale(1)';
+          e.target.style.boxShadow = '0 4px 12px rgba(27, 38, 44, 0.3)';
+        }}
       >
         {isOpen ? '✕' : '💬'}
       </div>
 
-      {/* Chat Window */}
       {isOpen && (
         <div style={styles.chatWindow}>
-          
-          {/* Header */}
           <div style={styles.header}>
-            <span style={styles.headerIcon}>🤖</span>
-            <span>InsurAI Assistant</span>
+            🎨 InsurAI Assistant
           </div>
-
-          {/* Messages Body */}
           <div style={styles.body} ref={chatBodyRef}>
             {messages.map((msg, index) => (
-              <div 
-                key={index} 
-                style={{
-                  display: 'flex',
-                  justifyContent: msg.sender === 'bot' ? 'flex-start' : 'flex-end',
-                  marginBottom: '1rem'
-                }}
-              >
+              <div key={index} style={{ display: 'flex' }}>
                 <div style={{ 
                   ...styles.message, 
                   ...(msg.sender === 'bot' ? styles.botMessage : styles.userMessage) 
@@ -142,12 +241,10 @@ const Chatbot = ({ employeeData = { name: 'Employee', claims: [], policies: [] }
             ))}
             {loading && (
               <div style={styles.loading}>
-                💭 InsurAI is thinking...
+                🎨 InsurAI is thinking.....
               </div>
             )}
           </div>
-
-          {/* Footer Input */}
           <div style={styles.footer}>
             <form onSubmit={handleSendMessage} style={styles.form}>
               <input
@@ -157,13 +254,35 @@ const Chatbot = ({ employeeData = { name: 'Employee', claims: [], policies: [] }
                 onKeyPress={handleKeyPress}
                 style={styles.input}
                 placeholder="Ask about claims, policies..."
+                onFocus={(e) => {
+                  e.target.style.background = 'white';
+                  e.target.style.borderColor = '#206c95';
+                  e.target.style.boxShadow = '0 0 0 2px rgba(32, 108, 149, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.background = '#f8fafc';
+                  e.target.style.borderColor = 'rgba(32, 108, 149, 0.2)';
+                  e.target.style.boxShadow = 'none';
+                }}
               />
               <button 
                 type="submit" 
                 style={styles.button}
                 disabled={loading}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.target.style.transform = 'translateY(-1px)';
+                    e.target.style.boxShadow = '0 4px 10px rgba(27, 38, 44, 0.3)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!loading) {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 2px 6px rgba(27, 38, 44, 0.2)';
+                  }
+                }}
               >
-                {loading ? '...' : '→'}
+                {loading ? '...' : 'Send'}
               </button>
             </form>
           </div>
@@ -171,142 +290,6 @@ const Chatbot = ({ employeeData = { name: 'Employee', claims: [], policies: [] }
       )}
     </>
   );
-};
-
-/* =========================
-   STYLES
-========================= */
-const styles = {
-  chatIcon: {
-    position: 'fixed',
-    bottom: '25px',
-    right: '25px',
-    width: '60px',
-    height: '60px',
-    background: theme.gradientNeon,
-    color: theme.bg,
-    borderRadius: '50%',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    fontSize: '24px',
-    cursor: 'pointer',
-    boxShadow: '0 4px 20px rgba(56,189,248,0.4)',
-    zIndex: 1000,
-    border: `1px solid ${theme.border}`,
-    fontWeight: 'bold',
-  },
-
-  chatWindow: {
-    position: 'fixed',
-    bottom: '100px',
-    right: '25px',
-    width: '380px',
-    height: '520px',
-    background: theme.surface,
-    backdropFilter: 'blur(20px)',
-    borderRadius: '20px',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-    zIndex: 1000,
-    border: `1px solid ${theme.border}`,
-  },
-
-  header: {
-    background: theme.gradientNeon,
-    color: theme.bg,
-    padding: '1.2rem',
-    fontWeight: 700,
-    textAlign: 'center',
-    fontSize: '1.05rem',
-    letterSpacing: '0.5px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '0.5rem',
-  },
-
-  headerIcon: {
-    fontSize: '1.3rem',
-  },
-
-  body: {
-    flex: 1,
-    padding: '1.2rem',
-    overflowY: 'auto',
-    background: theme.bg,
-  },
-
-  message: {
-    maxWidth: '80%',
-    padding: '0.9rem 1.1rem',
-    borderRadius: '16px',
-    lineHeight: '1.5',
-    whiteSpace: 'pre-wrap',
-    fontSize: '0.95rem',
-  },
-
-  botMessage: {
-    background: theme.surface,
-    color: theme.textPrimary,
-    border: `1px solid ${theme.border}`,
-  },
-
-  userMessage: {
-    background: theme.gradientNeon,
-    color: theme.bg,
-    fontWeight: 500,
-  },
-
-  footer: {
-    padding: '1rem',
-    borderTop: `1px solid ${theme.border}`,
-    background: theme.surface,
-  },
-
-  form: {
-    display: 'flex',
-    gap: '0.7rem',
-    alignItems: 'center',
-  },
-
-  input: {
-    flex: 1,
-    padding: '0.9rem 1rem',
-    border: `1px solid ${theme.border}`,
-    borderRadius: '12px',
-    outline: 'none',
-    fontSize: '0.95rem',
-    background: theme.bg,
-    color: theme.textPrimary,
-    fontFamily: 'inherit',
-  },
-
-  button: {
-    padding: '0.9rem 1.3rem',
-    border: 'none',
-    background: theme.gradientNeon,
-    color: theme.bg,
-    borderRadius: '12px',
-    cursor: 'pointer',
-    fontSize: '1.2rem',
-    fontWeight: 700,
-    transition: 'transform 0.2s',
-  },
-
-  loading: {
-    fontStyle: 'italic',
-    color: theme.neonBlue,
-    marginBottom: '1rem',
-    padding: '0.9rem',
-    background: theme.surface,
-    border: `1px solid ${theme.border}`,
-    borderRadius: '12px',
-    textAlign: 'center',
-    fontSize: '0.9rem',
-  }
 };
 
 export default Chatbot;

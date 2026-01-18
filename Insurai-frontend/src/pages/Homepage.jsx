@@ -59,7 +59,7 @@ const scaleHover = {
 ========================= */
 const HomePage = () => {
   const navigate = useNavigate();
-  const scrollToSection = (sectionId) => {
+   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -267,6 +267,7 @@ const HomePage = () => {
                 <p style={styles.accessLabel}>{action.title}</p>
                 <p style={styles.accessDesc}>{action.desc}</p>
               </div>
+
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
@@ -394,15 +395,7 @@ const roles = [
 ];
 
 const accessActions = [
-  {
-    title: "New Employee",
-    desc: "Create a secure InsurAI employee profile.",
-    button: "Register Employee",
-    path: "/employee/register",
-    icon: "✨",
-    accent: theme.neonBlue,
-  },
-  {
+   {
     title: "Employee Portal",
     desc: "Manage policies, claims, and support.",
     button: "Employee Login",
@@ -672,14 +665,15 @@ const styles = {
     fontSize: "0.9rem",
     color: theme.textSecondary,
   },
-  accessGrid: {
+
+ accessGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
     gap: "1.5rem",
     marginBottom: "3rem",
   },
 
-  accessCard: {
+ accessCard: {
     background: "rgba(15,23,42,0.6)",
     border: `1px solid ${theme.border}`,
     borderRadius: "18px",
@@ -690,11 +684,11 @@ const styles = {
     minHeight: "200px",
   },
 
-  accessIcon: {
+ accessIcon: {
     fontSize: "2rem",
   },
 
-  accessLabel: {
+ accessLabel: {
     fontSize: "1.1rem",
     fontWeight: 600,
     marginBottom: "0.4rem",
@@ -705,6 +699,13 @@ const styles = {
     fontSize: "0.9rem",
     lineHeight: 1.4,
     marginBottom: "0.6rem",
+  },
+
+  roleFeatures: {
+    marginBottom: "2rem",
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.6rem",
   },
 
   accessButton: {
@@ -724,6 +725,7 @@ const styles = {
     borderTop: `1px solid ${theme.border}`,
     background: "rgba(2,6,23,0.9)",
   },
+
 
   footerContent: {
     maxWidth: "1200px",
