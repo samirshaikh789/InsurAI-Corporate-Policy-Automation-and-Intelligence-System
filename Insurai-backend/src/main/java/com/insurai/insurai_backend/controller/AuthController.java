@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.insurai.insurai_backend.config.JwtUtil;
 import com.insurai.insurai_backend.model.Employee;
-import com.insurai.insurai_backend.model.ForgotPasswordRequest;
+import com.insurai.insurai_backend.dto.ForgotPasswordRequest;
 import com.insurai.insurai_backend.model.LoginRequest;
 import com.insurai.insurai_backend.model.RegisterRequest;
 import com.insurai.insurai_backend.repository.EmployeeRepository;
@@ -64,8 +64,7 @@ public class AuthController {
                 emp.getName(),
                 "EMPLOYEE",
                 "REGISTER",
-                "Employee registered successfully"
-        );
+                "Employee registered successfully");
 
         return ResponseEntity.ok("Employee registered successfully");
     }
@@ -97,16 +96,14 @@ public class AuthController {
                 emp.getName(),
                 "EMPLOYEE",
                 "LOGIN",
-                "Employee logged in"
-        );
+                "Employee logged in");
 
         return ResponseEntity.ok(Map.of(
                 "token", token,
                 "role", emp.getRole().name(),
                 "name", emp.getName(),
                 "employeeId", emp.getEmployeeId(),
-                "id", emp.getId()
-        ));
+                "id", emp.getId()));
     }
 
     // ================= Get All Employees =================
@@ -137,8 +134,7 @@ public class AuthController {
                 emp.getName(),
                 "EMPLOYEE",
                 "FORGOT_PASSWORD",
-                "Requested password reset"
-        );
+                "Requested password reset");
 
         return ResponseEntity.ok("Reset password link sent to your email");
     }
@@ -177,8 +173,7 @@ public class AuthController {
                 emp.getName(),
                 "EMPLOYEE",
                 "RESET_PASSWORD",
-                "Password reset successfully"
-        );
+                "Password reset successfully");
 
         return ResponseEntity.ok("Password reset successfully");
     }

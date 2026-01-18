@@ -21,6 +21,7 @@ import com.insurai.insurai_backend.model.RegisterRequest;
 import com.insurai.insurai_backend.service.AdminService;
 import com.insurai.insurai_backend.service.AuditLogService;
 import com.insurai.insurai_backend.service.ClaimService;
+import com.insurai.insurai_backend.service.HrService;
 import com.insurai.insurai_backend.service.PolicyService;
 
 @RestController
@@ -43,6 +44,8 @@ public class AdminController {
     @Autowired
     private AuditLogService auditLogService;
 
+    @Autowired
+    private HrService hrService; // ✅ NEW: For HR registration
 
     // -------------------- Admin Login --------------------
     @PostMapping("/login")
@@ -57,10 +60,31 @@ public class AdminController {
                     "Login successful",
                     adminService.getAdminName(email),
                     "ADMIN",
-                    token
-            ));
+                    token));
         } else {
             return ResponseEntity.status(403).body("Invalid admin credentials");
+        }
+    }
+
+    // -------------------- Register HR -------------------- ✅ FIXED
+    @PostMapping("/hr/register")
+    public ResponseEntity<?> registerHR(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @RequestBody RegisterRequest registerRequest) {
+
+        try {
+            if (!isAdminJwt(authHeader)) {
+                return ResponseEntity.status(403).body("Access denied. Please login as Admin.");
+            }
+
+            // ✅ Use HrService instead of AdminService
+            hrService.registerHR(registerRequest);
+
+            return ResponseEntity.ok("HR registered successfully");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
 
@@ -70,26 +94,18 @@ public class AdminController {
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @RequestBody RegisterRequest registerRequest) {
 
-        if (!isAdminJwt(authHeader)) {
-            return ResponseEntity.status(403).body("Access denied. Please login as Admin.");
+        try {
+            if (!isAdminJwt(authHeader)) {
+                return ResponseEntity.status(403).body("Access denied. Please login as Admin.");
+            }
+
+            adminService.registerAgent(registerRequest);
+            return ResponseEntity.ok("Agent registered successfully");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
-
-        adminService.registerAgent(registerRequest);
-        return ResponseEntity.ok("Agent registered successfully");
-    }
-
-    // -------------------- Register HR --------------------
-    @PostMapping("/hr/register")
-    public ResponseEntity<?> registerHR(
-            @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @RequestBody RegisterRequest registerRequest) {
-
-        if (!isAdminJwt(authHeader)) {
-            return ResponseEntity.status(403).body("Access denied. Please login as Admin.");
-        }
-
-        adminService.registerHR(registerRequest);
-        return ResponseEntity.ok("HR registered successfully");
     }
 
     // -------------------- Get All Claims --------------------
@@ -100,7 +116,7 @@ public class AdminController {
                 return ResponseEntity.status(403).body("Access denied. Please login as Admin.");
             }
 
-            List<Claim> claims = claimService.getAllClaims(); // Make sure this method exists in ClaimService
+            List<Claim> claims = claimService.getAllClaims();
             List<ClaimDTO> dtos = claims.stream()
                     .map(ClaimDTO::new)
                     .collect(Collectors.toList());
@@ -108,6 +124,54 @@ public class AdminController {
             return ResponseEntity.ok(dtos);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error fetching claims: " + e.getMessage());
+        }
+    }
+
+    // ================= Get All Fraud-Flagged Claims (Admin) =================
+    @GetMapping("/claims/fraud")
+    public ResponseEntity<?> getFraudClaimsAdmin(@RequestHeader(value = "Authorization") String authHeader) {
+        try {
+            if (!isAdminJwt(authHeader)) {
+                return ResponseEntity.status(403).body("Access denied. Please login as Admin.");
+            }
+
+            List<Claim> claims = claimService.getAllClaims()
+                    .stream()
+                    .filter(Claim::isFraud) // only fraud-flagged
+                    .collect(Collectors.toList());
+
+            List<ClaimDTO> dtos = claims.stream()
+                    .map(ClaimDTO::new)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(dtos);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error fetching fraud claims: " + e.getMessage());
+        }
+    }
+
+    // ================= Get All Audit Logs =================
+    @GetMapping("/audit/logs")
+    public ResponseEntity<?> getAllAuditLogs(
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(403).body("Missing or invalid Authorization header");
+            }
+
+            String token = authHeader.substring(7).trim();
+            String email = jwtUtil.extractEmail(token);
+            String role = jwtUtil.extractRole(token);
+
+            if (!"ADMIN".equalsIgnoreCase(role)) {
+                return ResponseEntity.status(403).body("Unauthorized: Not an admin");
+            }
+
+            List<AuditLog> logs = auditLogService.getAllLogs();
+            return ResponseEntity.ok(logs);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error fetching audit logs: " + e.getMessage());
         }
     }
 
@@ -121,155 +185,165 @@ public class AdminController {
         return false;
     }
 
-// ================= Get All Fraud-Flagged Claims (Admin) =================
-@GetMapping("/claims/fraud")
-public ResponseEntity<?> getFraudClaimsAdmin(@RequestHeader(value = "Authorization") String authHeader) {
-    try {
-        if (!isAdminJwt(authHeader)) {
-            return ResponseEntity.status(403).body("Access denied. Please login as Admin.");
+    // -------------------- Inner class for Login response --------------------
+    public static class LoginResponse {
+        private String message;
+        private String name;
+        private String role;
+        private String token;
+
+        public LoginResponse(String message, String name, String role, String token) {
+            this.message = message;
+            this.name = name;
+            this.role = role;
+            this.token = token;
         }
 
-        List<Claim> claims = claimService.getAllClaims()
-                .stream()
-                .filter(Claim::isFraud) // only fraud-flagged
-                .collect(Collectors.toList());
-
-        List<ClaimDTO> dtos = claims.stream()
-                .map(ClaimDTO::new)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(dtos);
-    } catch (Exception e) {
-        return ResponseEntity.status(500).body("Error fetching fraud claims: " + e.getMessage());
-    }
-}
-
-// ================= Get All Audit Logs =================
-@GetMapping("/audit/logs")
-public ResponseEntity<?> getAllAuditLogs(
-        @RequestHeader(value = "Authorization", required = false) String authHeader
-) {
-    try {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(403).body("Missing or invalid Authorization header");
+        public String getMessage() {
+            return message;
         }
 
-        String token = authHeader.substring(7).trim();
-        String email = jwtUtil.extractEmail(token);
-        String role = jwtUtil.extractRole(token);
-
-        if (!"ADMIN".equalsIgnoreCase(role)) {
-            return ResponseEntity.status(403).body("Unauthorized: Not an admin");
+        public String getName() {
+            return name;
         }
 
-        List<AuditLog> logs = auditLogService.getAllLogs();
-        return ResponseEntity.ok(logs);
+        public String getRole() {
+            return role;
+        }
 
-    } catch (Exception e) {
-        return ResponseEntity.status(500).body("Error fetching audit logs: " + e.getMessage());
-    }
-}
-
-
-// -------------------- Inner class for Login response --------------------
-public static class LoginResponse {
-    private String message;
-    private String name;
-    private String role;
-    private String token;
-
-    public LoginResponse(String message, String name, String role, String token) {
-        this.message = message;
-        this.name = name;
-        this.role = role;
-        this.token = token;
+        public String getToken() {
+            return token;
+        }
     }
 
-    public String getMessage() { return message; }
-    public String getName() { return name; }
-    public String getRole() { return role; }
-    public String getToken() { return token; }
-}
+    // -------------------- Inner class for Claim DTO --------------------
+    public static class ClaimDTO {
+        private Long id;
+        private String title;
+        private String description;
+        private Double amount;
+        private String status;
+        private String remarks;
+        private java.time.LocalDateTime claimDate;
+        private java.time.LocalDateTime createdAt;
+        private java.time.LocalDateTime updatedAt;
 
-// -------------------- Inner class for Claim DTO --------------------
-public static class ClaimDTO {
-    private Long id;
-    private String title;
-    private String description;
-    private Double amount;
-    private String status;
-    private String remarks;
-    private java.time.LocalDateTime claimDate;
-    private java.time.LocalDateTime createdAt;
-    private java.time.LocalDateTime updatedAt;
+        private Long employeeId;
+        private String employeeName;
+        private Long policyId;
+        private String policyName;
+        private java.util.List<String> documents;
+        private Long assignedHrId;
+        private String assignedHrName;
 
-    private Long employeeId;
-    private String employeeName;         // ✅ Added
-    private Long policyId;
-    private String policyName;
-    private java.util.List<String> documents;
-    private Long assignedHrId;
-    private String assignedHrName;       // ✅ Added
+        private boolean fraudFlag;
+        private String fraudReason;
 
-    private boolean fraudFlag;           // ✅ Flag indicator
-    private String fraudReason;          // ✅ Fraud reason details
+        public ClaimDTO(Claim claim) {
+            this.id = claim.getId();
+            this.title = claim.getTitle();
+            this.description = claim.getDescription();
+            this.amount = claim.getAmount();
+            this.status = claim.getStatus();
+            this.remarks = claim.getRemarks();
+            this.claimDate = claim.getClaimDate();
+            this.createdAt = claim.getCreatedAt();
+            this.updatedAt = claim.getUpdatedAt();
 
-    public ClaimDTO(Claim claim) {
-        this.id = claim.getId();
-        this.title = claim.getTitle();
-        this.description = claim.getDescription();
-        this.amount = claim.getAmount();
-        this.status = claim.getStatus();
-        this.remarks = claim.getRemarks();
-        this.claimDate = claim.getClaimDate();
-        this.createdAt = claim.getCreatedAt();
-        this.updatedAt = claim.getUpdatedAt();
+            if (claim.getEmployee() != null) {
+                this.employeeId = claim.getEmployee().getId();
+                this.employeeName = claim.getEmployee().getName();
+            }
 
-        if (claim.getEmployee() != null) {
-            this.employeeId = claim.getEmployee().getId();
-            this.employeeName = claim.getEmployee().getName(); // ✅ show readable employee name
+            if (claim.getAssignedHr() != null) {
+                this.assignedHrId = claim.getAssignedHr().getId();
+                this.assignedHrName = claim.getAssignedHr().getName();
+            }
+
+            if (claim.getPolicy() != null) {
+                this.policyId = claim.getPolicy().getId();
+                this.policyName = claim.getPolicy().getPolicyName();
+            } else {
+                this.policyName = "N/A";
+            }
+
+            this.documents = claim.getDocuments();
+            this.fraudFlag = claim.isFraud();
+            this.fraudReason = claim.getFraudReason();
         }
 
-        if (claim.getAssignedHr() != null) {
-            this.assignedHrId = claim.getAssignedHr().getId();
-            this.assignedHrName = claim.getAssignedHr().getName(); // ✅ readable HR name
+        // -------------------- Getters --------------------
+        public Long getId() {
+            return id;
         }
 
-        if (claim.getPolicy() != null) {
-            this.policyId = claim.getPolicy().getId();
-            this.policyName = claim.getPolicy().getPolicyName();
-        } else {
-            this.policyName = "N/A";
+        public String getTitle() {
+            return title;
         }
 
-        this.documents = claim.getDocuments();
-        this.fraudFlag = claim.isFraud();
-        this.fraudReason = claim.getFraudReason();
+        public String getDescription() {
+            return description;
+        }
+
+        public Double getAmount() {
+            return amount;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public String getRemarks() {
+            return remarks;
+        }
+
+        public java.time.LocalDateTime getClaimDate() {
+            return claimDate;
+        }
+
+        public java.time.LocalDateTime getCreatedAt() {
+            return createdAt;
+        }
+
+        public java.time.LocalDateTime getUpdatedAt() {
+            return updatedAt;
+        }
+
+        public Long getEmployeeId() {
+            return employeeId;
+        }
+
+        public String getEmployeeName() {
+            return employeeName;
+        }
+
+        public Long getPolicyId() {
+            return policyId;
+        }
+
+        public String getPolicyName() {
+            return policyName;
+        }
+
+        public java.util.List<String> getDocuments() {
+            return documents;
+        }
+
+        public Long getAssignedHrId() {
+            return assignedHrId;
+        }
+
+        public String getAssignedHrName() {
+            return assignedHrName;
+        }
+
+        public boolean isFraudFlag() {
+            return fraudFlag;
+        }
+
+        public String getFraudReason() {
+            return fraudReason;
+        }
+
     }
-
-    // -------------------- Getters --------------------
-    public Long getId() { return id; }
-    public String getTitle() { return title; }
-    public String getDescription() { return description; }
-    public Double getAmount() { return amount; }
-    public String getStatus() { return status; }
-    public String getRemarks() { return remarks; }
-    public java.time.LocalDateTime getClaimDate() { return claimDate; }
-    public java.time.LocalDateTime getCreatedAt() { return createdAt; }
-    public java.time.LocalDateTime getUpdatedAt() { return updatedAt; }
-
-    public Long getEmployeeId() { return employeeId; }
-    public String getEmployeeName() { return employeeName; }     // ✅ Getter for employee name
-    public Long getPolicyId() { return policyId; }
-    public String getPolicyName() { return policyName; }
-    public java.util.List<String> getDocuments() { return documents; }
-
-    public Long getAssignedHrId() { return assignedHrId; }
-    public String getAssignedHrName() { return assignedHrName; } // ✅ Getter for HR name
-
-    public boolean isFraudFlag() { return fraudFlag; }
-    public String getFraudReason() { return fraudReason; }
-}
-
-
 }
